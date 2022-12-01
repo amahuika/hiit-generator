@@ -1,20 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
+
+import GenerateScreen from "./screens/GenerateScreen";
+import HomeScreen from "./screens/HomeScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import WorkoutScreen from "./screens/WorkoutScreen";
+
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <>
       <StatusBar style="auto" />
-    </View>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerTitleAlign: "center" }}>
+          <Stack.Screen
+            name="home"
+            component={HomeScreen}
+            options={{ title: "Workout Generator" }}
+          />
+          <Stack.Screen
+            name="generator"
+            component={GenerateScreen}
+            options={{ title: "Customize My Workout" }}
+          />
+          <Stack.Screen name="workout" component={WorkoutScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const styles = StyleSheet.create({});
