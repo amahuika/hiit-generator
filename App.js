@@ -6,6 +6,7 @@ import GenerateScreen from "./screens/GenerateScreen";
 import HomeScreen from "./screens/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import WorkoutScreen from "./screens/WorkoutScreen";
+import InputWorkoutScreen from "./screens/InputWorkoutScreen";
 
 const Stack = createStackNavigator();
 
@@ -21,11 +22,20 @@ export default function App() {
             options={{ title: "Workout Generator" }}
           />
           <Stack.Screen
-            name="generator"
-            component={GenerateScreen}
+            name="input"
+            component={InputWorkoutScreen}
             options={{ title: "Customize My Workout" }}
           />
-          <Stack.Screen name="workout" component={WorkoutScreen} />
+          <Stack.Screen
+            name="generator"
+            component={GenerateScreen}
+            options={{ title: "My Workout" }}
+          />
+          <Stack.Screen
+            name="workout"
+            component={WorkoutScreen}
+            options={{ headerShown: true }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </>

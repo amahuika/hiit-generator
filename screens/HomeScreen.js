@@ -3,7 +3,7 @@ import MyButton from "../components/MyButton";
 
 function HomeScreen({ route, navigation }) {
   function getStartedHandle() {
-    navigation.navigate("generator");
+    navigation.navigate("input");
   }
 
   return (
