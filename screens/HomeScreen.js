@@ -1,5 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import MyButton from "../components/MyButton";
+import { LinearGradient } from "expo-linear-gradient";
 
 function HomeScreen({ route, navigation }) {
   function getStartedHandle() {
@@ -8,6 +9,7 @@ function HomeScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* <LinearGradient style={styles.background} colors={["#393E46"]} /> */}
       {/* <View style={styles.buttonContainer}> */}
       <MyButton
         onPress={getStartedHandle}
@@ -27,13 +29,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 16,
+    backgroundColor: "#222831",
   },
   buttonContainer: {},
   button: {
-    backgroundColor: "#f76e6e",
+    backgroundColor: "#00ADB5",
   },
   buttonText: {
     fontSize: 24,
     color: "white",
+  },
+
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: "100%",
   },
 });

@@ -13,9 +13,20 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerTitleAlign: "center" }}>
+        <Stack.Navigator
+          screenOptions={{
+            headerTitleAlign: "center",
+            headerTintColor: "#EEEEEE",
+            headerStyle: { backgroundColor: "#393E46" },
+            headerShadowVisible: false,
+            headerTitleStyle: {
+              color: "#00ADB5",
+              fontSize: 24,
+            },
+          }}
+        >
           <Stack.Screen
             name="home"
             component={HomeScreen}

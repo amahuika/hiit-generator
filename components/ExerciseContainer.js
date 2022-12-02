@@ -1,16 +1,35 @@
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 
 const Exercises = ({ title, description }) => {
+  const [showDescription, setShowDescription] = useState(false);
+
+  function showDescriptionHandle() {
+    showDescription ? setShowDescription(false) : setShowDescription(true);
+  }
   return (
     <View style={styles.showExerciseList}>
-      <View style={styles.exerciseTextContainer}>
+      <View style={showDescription && styles.exerciseTextContainer}>
         <Text style={styles.myTextExercise}>{title}</Text>
-        <Text style={styles.myTextLength}>20sec x3</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={styles.myTextLength}>20sec x3</Text>
+
+          <Pressable onPress={showDescriptionHandle}>
+            <Ionicons
+              name={!showDescription ? "chevron-down" : "chevron-up"}
+              size={24}
+              color="black"
+            />
+          </Pressable>
+        </View>
       </View>
-      <View>
-        <Text style={styles.myText}>Description</Text>
-        <Text style={styles.myText}>{description}</Text>
-      </View>
+      {showDescription && (
+        <View>
+          <Text style={styles.myText}>Description</Text>
+          <Text style={styles.myText}>{description}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -37,7 +56,7 @@ function ExerciseContainer({ workoutList }) {
     <View>
       {round1results.length > 0 && (
         <>
-          <View style={styles.showExerciseList}>
+          <View style={styles.roundContainer}>
             <Text style={styles.roundText}>Round 1</Text>
           </View>
           {round1results}
@@ -45,7 +64,7 @@ function ExerciseContainer({ workoutList }) {
       )}
       {round2results.length > 0 && (
         <>
-          <View style={styles.showExerciseList}>
+          <View style={styles.roundContainer}>
             <Text style={styles.roundText}>Round 2</Text>
           </View>
           {round2results}
@@ -53,7 +72,7 @@ function ExerciseContainer({ workoutList }) {
       )}
       {round3results.length > 0 && (
         <>
-          <View style={styles.showExerciseList}>
+          <View style={styles.roundContainer}>
             <Text style={styles.roundText}>Round 3</Text>
           </View>
           {round3results}
@@ -61,7 +80,7 @@ function ExerciseContainer({ workoutList }) {
       )}
       {round4results.length > 0 && (
         <>
-          <View style={styles.showExerciseList}>
+          <View style={styles.roundContainer}>
             <Text style={styles.roundText}>Round 4</Text>
           </View>
           {round4results}
@@ -80,7 +99,16 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     elevation: 4,
   },
+  roundContainer: {
+    backgroundColor: "#00ADB5",
+    borderRadius: 4,
+    padding: 8,
+    marginVertical: 8,
+    elevation: 4,
+  },
+
   myText: {
+    // color: "#EEEEEE",
     color: "#393E46",
   },
   exerciseTextContainer: {
@@ -88,14 +116,17 @@ const styles = StyleSheet.create({
   },
   myTextExercise: {
     fontSize: 20,
+    // color: "#EEEEEE",
     color: "#393E46",
     marginRight: 8,
   },
   myTextLength: {
+    // color: "#EEEEEE",
     color: "#393E46",
   },
   roundText: {
-    color: "#393E46",
+    color: "#EEEEEE",
+    // color: "#393E46",
     fontSize: 26,
     // fontWeight: "bold",
     textAlign: "center",

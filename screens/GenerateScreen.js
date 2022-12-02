@@ -28,10 +28,10 @@ function WorkoutScreen({ route, navigation }) {
   // 45 sec rest
   // repeat * 2
 
-  navigation.setOptions({
-    headerStyle: { backgroundColor: "#EEEEEE" },
-    title: "Your Workout",
-  });
+  // navigation.setOptions({
+  //   headerStyle: { backgroundColor: "#EEEEEE" },
+  //   title: "Your Workout",
+  // });
   const userMinutes = route.params.minutes;
   useEffect(() => {
     setMinutes(userMinutes);
@@ -133,13 +133,15 @@ const styles = StyleSheet.create({
 
   button: {
     position: "absolute",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#393E46",
+    // backgroundColor: "#00ADB5",
     bottom: 8,
     marginBottom: 5,
     borderRadius: 50,
   },
   btnText: {
-    color: "#EEEEEE",
+    color: "#00ADB5",
+    // color: "#EEEEEE",
     fontSize: 24,
   },
   exerciseList: {

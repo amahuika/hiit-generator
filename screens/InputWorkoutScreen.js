@@ -16,7 +16,7 @@ function InputWorkoutScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.innerContainer}>
-        <Text>Enter length in Minutes </Text>
+        <Text style={styles.label}>Enter length in Minutes </Text>
         <TextInput
           style={styles.input}
           placeholder="e.g. 20"
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
+    backgroundColor: "#222831",
   },
   innerContainer: {
     marginTop: 16,
@@ -58,5 +59,8 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#EEEEEE",
     fontSize: 24,
+  },
+  label: {
+    color: "#EEEEEE",
   },
 });
