@@ -21,12 +21,12 @@ export default CountdownDisplay;
 
 const styles = StyleSheet.create({
   timerText: {
-    fontSize: 56,
+    fontSize: 74,
     color: "#00ADB5",
     fontWeight: "bold",
   },
   timerTextTitle: {
-    fontSize: 36,
+    fontSize: 40,
   },
   countdown: {
     borderRadius: 8,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     borderColor: "#00ADB5",
     borderWidth: 2,
     marginTop: 16,
-    minHeight: "50%",
+    minHeight: "60%",
   },
   timer: {
     marginVertical: 24,

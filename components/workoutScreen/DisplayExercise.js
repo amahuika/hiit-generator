@@ -33,9 +33,10 @@ const styles = StyleSheet.create({
   exerciseContainer: {
     borderColor: "black",
     borderWidth: 0.5,
-    borderRadius: 4,
+    borderRadius: 8,
     padding: 16,
-    marginVertical: 14,
+
+    marginBottom: 8,
     backgroundColor: "#EEEEEE",
     elevation: 4,
   },

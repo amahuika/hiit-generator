@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import {
   AddBreaks,
+  displayTimeRemaining,
   GetExercises,
   GetWorkoutOrder,
 } from "../HelperFunctions/HelperFunctions";
@@ -23,6 +24,7 @@ function WorkoutScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
   const [exerciseList, setExerciseList] = useState([]);
   const [workout, setWorkout] = useState([]);
+  const [totalTime, setTotalTime] = useState("");
 
   // 20sec * 3
   // 10sec rest
@@ -97,6 +99,9 @@ function WorkoutScreen({ route, navigation }) {
 
     setWorkout((val) => [...workoutOrder]);
 
+    let totalInSeconds = 0;
+    workoutOrder.map((item) => (totalInSeconds += item.length));
+    setTotalTime(displayTimeRemaining(totalInSeconds));
     // setWorkout((val) => [...workoutOrder]);
 
     return;
@@ -105,6 +110,7 @@ function WorkoutScreen({ route, navigation }) {
   function startHandler() {
     navigation.navigate("workout", {
       workout: workout,
+      totalTime: totalTime,
     });
   }
 

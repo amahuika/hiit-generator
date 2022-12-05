@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
-import {
-  Alert,
-  AppState,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import ConfettiCannon from "react-native-confetti-cannon";
+// need to uninstall
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
-import CenteredView from "../components/CenteredView";
-import { Ionicons } from "@expo/vector-icons";
+// need to uninstall
 import CountDown from "react-native-countdown-component";
+// need to uninstall
 // import TimerCountdown from "react-native-timer-countdown";
 
 import DisplayExercise from "../components/workoutScreen/DisplayExercise";
 import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
 import CountdownDisplay from "../components/workoutScreen/CountdownDisplay";
+import DisplayFinish from "../components/workoutScreen/DisplayFinish";
+import Footer from "../components/workoutScreen/Footer";
 
 // const shortBeep = new Audio("../assets/sounds/short-beep-tone-47916.mp3");
 
@@ -24,7 +20,6 @@ function WorkoutScreen({ route, navigation }) {
   const [workoutList, setWorkoutList] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-
   const [timer, setTimer] = useState(10);
   const [hasPaused, setHasPaused] = useState(false);
   const [totalTime, setTotalTime] = useState();
@@ -35,7 +30,12 @@ function WorkoutScreen({ route, navigation }) {
     description: "",
   });
 
+  const explosion = useRef();
+  function explosionTrigger() {
+    explosion.current.start();
+  }
   const workout = route.params.workout;
+  const totalTimeInMinutes = route.params.totalTime;
 
   navigation.setOptions({
     // title: "Exercise",
@@ -70,18 +70,22 @@ function WorkoutScreen({ route, navigation }) {
         setTotalTime(displayTimeRemaining(updatedTotal));
 
         setTimer(timer - 1);
-      }, 800);
+      }, 750);
 
       if (timer < 1) {
         clearTimeout(countdown);
         if (workoutList.length === 0) {
+          setIsFinished(true);
+          setTimeout(() => {
+            explosionTrigger();
+          }, 700);
           return;
         }
         timerCompleteHandler();
       }
     }
 
-    if (!hasStarted && workoutList.length === 0) {
+    if (!hasStarted && totalTimeInSeconds === null) {
       let totalTimeInSeconds = 0;
       workout.map((item) => (totalTimeInSeconds += item.length));
 
@@ -123,8 +127,9 @@ function WorkoutScreen({ route, navigation }) {
         {
           text: "OK",
           onPress: () => {
-            setHasStarted(false);
             navigation.navigate("generator", { minutes: 0 });
+            // setHasStarted(false);
+            // setIsFinished(false);
           },
         },
       ]
@@ -132,6 +137,9 @@ function WorkoutScreen({ route, navigation }) {
   }
 
   function onSkip() {
+    if (workoutList.length === 0) {
+      return;
+    }
     const newWorkout = [...workoutList];
     let totalTimeInSeconds = 0;
     newWorkout.map((item) => (totalTimeInSeconds += item.length));
@@ -155,17 +163,28 @@ function WorkoutScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <CountdownDisplay
-        count={timer}
-        title={currentExercise.title}
-        description={currentExercise.description}
-      />
+      {!isFinished && (
+        <CountdownDisplay
+          count={timer}
+          title={currentExercise.title}
+          description={currentExercise.description}
+        />
+      )}
 
-      <View style={styles.upNextContainer}>
-        <Text style={styles.upNextText}>Up Next</Text>
-      </View>
+      {isFinished && (
+        <DisplayFinish totalTime={totalTimeInMinutes} exercises={workout} />
+      )}
 
-      <ScrollView style={{ marginHorizontal: 16 }}>
+      {workoutList.length !== 0 && (
+        <View style={styles.upNextContainer}>
+          <Text style={styles.upNextText}>Up Next</Text>
+        </View>
+      )}
+
+      <ScrollView
+        style={{ marginHorizontal: 16 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         {workoutList.map((item) => {
           return (
             <DisplayExercise
@@ -177,42 +196,26 @@ function WorkoutScreen({ route, navigation }) {
         })}
       </ScrollView>
 
-      <View style={styles.footerContainer}>
-        <CenteredView style={styles.totalTime}></CenteredView>
+      {!isFinished && (
+        <Footer
+          onPause={onPause}
+          onStop={onStop}
+          onSkip={onSkip}
+          hasPaused={hasPaused}
+        />
+      )}
 
-        <View style={styles.pauseBtnContainer}>
-          <View>
-            <Pressable onPress={onStop}>
-              <Text>{<Ionicons name="stop" size={40} color="#EEEEEE" />}</Text>
-            </Pressable>
-          </View>
-
-          <View>
-            <Pressable onPress={onPause}>
-              <Text>
-                {!hasPaused ? (
-                  <Ionicons name="pause" size={40} color="#EEEEEE" />
-                ) : (
-                  <Ionicons name="play" size={40} color="#EEEEEE" />
-                )}
-              </Text>
-            </Pressable>
-          </View>
-          <View>
-            <Pressable onPress={onSkip}>
-              <Text>
-                {
-                  <Ionicons
-                    name="play-skip-forward"
-                    size={40}
-                    color="#EEEEEE"
-                  />
-                }
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
+      {isFinished && (
+        <ConfettiCannon
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          autoStart={false}
+          fadeOut={true}
+          fallSpeed={5000}
+          explosionSpeed={500}
+          ref={explosion}
+        />
+      )}
     </View>
   );
 }
@@ -237,18 +240,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
   },
-  footerContainer: {
-    paddingBottom: 16,
-    backgroundColor: "#393E46",
-    padding: 8,
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-  },
-  pauseBtnContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-  },
+
   totalTimeText: {
     padding: 8,
     fontSize: 20,
@@ -268,8 +260,8 @@ const styles = StyleSheet.create({
   upNextContainer: {
     backgroundColor: "#00ADB5",
     marginHorizontal: 16,
+    marginBottom: 8,
     padding: 8,
     borderRadius: 8,
-    width: "20%",
   },
 });
