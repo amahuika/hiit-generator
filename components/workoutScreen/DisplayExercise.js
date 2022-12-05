@@ -12,12 +12,12 @@ function DisplayExercise({ title, length, description }) {
       </CenteredView>
       {description !== undefined && (
         <>
-          <CenteredView>
+          {/* <CenteredView>
             <Text style={styles.descriptionText}>Description</Text>
           </CenteredView>
           <View>
             <Text>{description}</Text>
-          </View>
+          </View> */}
         </>
       )}
     </View>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 16,
     marginVertical: 14,
-    backgroundColor: "#fefefe",
+    backgroundColor: "#EEEEEE",
     elevation: 4,
   },
   exerciseText: {

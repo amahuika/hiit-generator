@@ -41,16 +41,32 @@ function ExerciseContainer({ workoutList }) {
   let round4 = workoutList.filter((item) => item.round === 4);
 
   const round1results = round1.map((item) => (
-    <Exercises title={item.title} description={item.description} />
+    <Exercises
+      key={item.title}
+      title={item.title}
+      description={item.description}
+    />
   ));
   const round2results = round2.map((item) => (
-    <Exercises title={item.title} description={item.description} />
+    <Exercises
+      key={item.title}
+      title={item.title}
+      description={item.description}
+    />
   ));
   const round3results = round3.map((item) => (
-    <Exercises title={item.title} description={item.description} />
+    <Exercises
+      key={item.title}
+      title={item.title}
+      description={item.description}
+    />
   ));
   const round4results = round4.map((item) => (
-    <Exercises title={item.title} description={item.description} />
+    <Exercises
+      key={item.title}
+      title={item.title}
+      description={item.description}
+    />
   ));
   return (
     <View>

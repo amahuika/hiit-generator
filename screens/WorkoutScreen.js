@@ -1,29 +1,55 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  AppState,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import CenteredView from "../components/CenteredView";
 import { Ionicons } from "@expo/vector-icons";
-import MyButton from "../components/MyButton";
+import CountDown from "react-native-countdown-component";
+// import TimerCountdown from "react-native-timer-countdown";
+
 import DisplayExercise from "../components/workoutScreen/DisplayExercise";
 import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
+import CountdownDisplay from "../components/workoutScreen/CountdownDisplay";
+
+// const shortBeep = new Audio("../assets/sounds/short-beep-tone-47916.mp3");
 
 function WorkoutScreen({ route, navigation }) {
   const [workoutList, setWorkoutList] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+
   const [timer, setTimer] = useState(10);
   const [hasPaused, setHasPaused] = useState(false);
   const [totalTime, setTotalTime] = useState();
-  const [totalTimeInSeconds, setTotalTimeInSeconds] = useState();
-  const [currentExercise, setCurrentExercise] = useState();
+  const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
+  const [currentExercise, setCurrentExercise] = useState({
+    title: "",
+    length: 0,
+    description: "",
+  });
 
   const workout = route.params.workout;
+
+  navigation.setOptions({
+    // title: "Exercise",
+    headerLeft: () => null,
+    headerRight: () => {
+      return (
+        <View style={styles.totalTimeContainer}>
+          <Text style={styles.totalTimeText}>{totalTime}</Text>
+        </View>
+      );
+    },
+    // headerStyle: { backgroundColor: "#222831" },
+    // headerTitleStyle: { fontSize: 36, color: "#00ADB5" },
+  });
   // 20sec * 3
   // 10sec rest
   // 45 sec rest
@@ -31,67 +57,57 @@ function WorkoutScreen({ route, navigation }) {
   // setCurrentRound(workout[0].round);
   useEffect(() => {
     let countdown;
-    const updatedTotal = totalTimeInSeconds - 1;
+    let updatedTotal;
 
     if (hasPaused) {
       return;
     }
     if (hasStarted && !hasPaused) {
-      countdown = setTimeout(() => {
-        setTotalTimeInSeconds(totalTimeInSeconds - 1);
+      countdown = setInterval(() => {
+        updatedTotal = totalTimeInSeconds - 1;
+        setTotalTimeInSeconds(updatedTotal);
+
         setTotalTime(displayTimeRemaining(updatedTotal));
+
         setTimer(timer - 1);
       }, 800);
 
       if (timer < 1) {
         clearTimeout(countdown);
-
         if (workoutList.length === 0) {
           return;
         }
-        const newWorkout = [...workoutList];
-        setTimer(newWorkout[0].length);
-        setCurrentExercise(newWorkout[0].title);
-        newWorkout.shift();
-        // setCurrentRound(newWorkout[0].round);
-        setWorkoutList(newWorkout);
+        timerCompleteHandler();
       }
     }
-    if (!hasStarted) {
-      const lastElementIndex = workout.length - 1;
-      if (
-        workout[lastElementIndex].title === "Break" ||
-        workout[lastElementIndex].title === "Rest"
-      ) {
-        workout.pop();
-      }
-      if (workout[0].title !== "Get Ready") {
-        workout.unshift({ title: "Get Ready", length: 10 });
-      }
 
+    if (!hasStarted && workoutList.length === 0) {
       let totalTimeInSeconds = 0;
       workout.map((item) => (totalTimeInSeconds += item.length));
+
       setTotalTimeInSeconds(totalTimeInSeconds);
       setTotalTime(displayTimeRemaining(totalTimeInSeconds));
-      setCurrentExercise(workout[0].title);
-      workout.shift();
-      setWorkoutList(workout);
+
+      const myWorkout = [...workout];
+      setCurrentExercise(myWorkout[0]);
+      setTimer(myWorkout[0].length);
+
+      myWorkout.shift();
+      setWorkoutList(myWorkout);
+      setHasStarted(true);
     }
 
     return () => {
-      clearTimeout(countdown);
+      clearInterval(countdown);
     };
-  }, [timer, hasStarted, hasPaused, totalTimeInSeconds]);
-
-  function onStartHandler() {
-    setHasStarted(true);
-  }
+  }, [timer, hasPaused, hasStarted]);
 
   function onPause() {
     hasPaused ? setHasPaused(false) : setHasPaused(true);
   }
 
   function onStop() {
+    setHasPaused(true);
     Alert.alert(
       "Are you sure you want to stop?",
       "This will reset your workout",
@@ -99,11 +115,18 @@ function WorkoutScreen({ route, navigation }) {
         {
           text: "Cancel",
           onPress: () => {
+            setHasPaused(false);
             return;
           },
           style: "cancel",
         },
-        { text: "OK", onPress: () => navigation.navigate("generator") },
+        {
+          text: "OK",
+          onPress: () => {
+            setHasStarted(false);
+            navigation.navigate("generator", { minutes: 0 });
+          },
+        },
       ]
     );
   }
@@ -116,24 +139,33 @@ function WorkoutScreen({ route, navigation }) {
     setTotalTime(displayTimeRemaining(totalTimeInSeconds));
 
     setTimer(newWorkout[0].length);
-    setCurrentExercise(newWorkout[0].title);
+    setCurrentExercise(newWorkout[0]);
     newWorkout.shift();
 
     setWorkoutList(newWorkout);
   }
 
+  function timerCompleteHandler() {
+    const newWorkout = [...workoutList];
+    setCurrentExercise(newWorkout[0]);
+    setTimer(newWorkout[0].length);
+    newWorkout.shift();
+    setWorkoutList(newWorkout);
+  }
+
   return (
     <View style={styles.container}>
-      <CenteredView style={styles.countdown}>
-        <Text style={styles.timerText}>{currentExercise}</Text>
-        <Text style={styles.timerText}>
-          {timer.toString().padStart(2, 0)} Sec
-        </Text>
-      </CenteredView>
-      <CenteredView style={{ paddingVertical: 16 }}>
+      <CountdownDisplay
+        count={timer}
+        title={currentExercise.title}
+        description={currentExercise.description}
+      />
+
+      <View style={styles.upNextContainer}>
         <Text style={styles.upNextText}>Up Next</Text>
-      </CenteredView>
-      <ScrollView style={{ padding: 8 }}>
+      </View>
+
+      <ScrollView style={{ marginHorizontal: 16 }}>
         {workoutList.map((item) => {
           return (
             <DisplayExercise
@@ -144,57 +176,42 @@ function WorkoutScreen({ route, navigation }) {
           );
         })}
       </ScrollView>
-      <View style={styles.footerContainer}>
-        <CenteredView style={styles.totalTime}>
-          <Text style={styles.totalTimeText}>Time remaining: {totalTime}</Text>
-        </CenteredView>
-        {!hasStarted && (
-          <MyButton
-            text="Lets Go!"
-            style={styles.startBtn}
-            txtStyle={styles.btnTxtStyle}
-            onPress={onStartHandler}
-          />
-        )}
-        {hasStarted && (
-          <>
-            <View style={styles.pauseBtnContainer}>
-              <View>
-                <Pressable onPress={onStop}>
-                  <Text>
-                    {<Ionicons name="stop" size={40} color="white" />}
-                  </Text>
-                </Pressable>
-              </View>
 
-              <View>
-                <Pressable onPress={onPause}>
-                  <Text>
-                    {!hasPaused ? (
-                      <Ionicons name="pause" size={40} color="white" />
-                    ) : (
-                      <Ionicons name="play" size={40} color="white" />
-                    )}
-                  </Text>
-                </Pressable>
-              </View>
-              <View>
-                <Pressable onPress={onSkip}>
-                  <Text>
-                    {
-                      <Ionicons
-                        name="play-skip-forward"
-                        size={40}
-                        color="white"
-                      />
-                    }
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          </>
-        )}
-        {/* <Text>Total Time remaining: 13.4</Text> */}
+      <View style={styles.footerContainer}>
+        <CenteredView style={styles.totalTime}></CenteredView>
+
+        <View style={styles.pauseBtnContainer}>
+          <View>
+            <Pressable onPress={onStop}>
+              <Text>{<Ionicons name="stop" size={40} color="#EEEEEE" />}</Text>
+            </Pressable>
+          </View>
+
+          <View>
+            <Pressable onPress={onPause}>
+              <Text>
+                {!hasPaused ? (
+                  <Ionicons name="pause" size={40} color="#EEEEEE" />
+                ) : (
+                  <Ionicons name="play" size={40} color="#EEEEEE" />
+                )}
+              </Text>
+            </Pressable>
+          </View>
+          <View>
+            <Pressable onPress={onSkip}>
+              <Text>
+                {
+                  <Ionicons
+                    name="play-skip-forward"
+                    size={40}
+                    color="#EEEEEE"
+                  />
+                }
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -205,12 +222,9 @@ export default WorkoutScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#d8d1d1",
+    backgroundColor: "#222831",
   },
 
-  timerText: {
-    fontSize: 46,
-  },
   btnContainer: {
     width: "100%",
     marginTop: 8,
@@ -225,29 +239,37 @@ const styles = StyleSheet.create({
   },
   footerContainer: {
     paddingBottom: 16,
-    backgroundColor: "#746f6f",
+    backgroundColor: "#393E46",
     padding: 8,
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
   },
   pauseBtnContainer: {
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
   totalTimeText: {
-    paddingBottom: 16,
-    paddingTop: 8,
-    fontSize: 16,
-    color: "white",
+    padding: 8,
+    fontSize: 20,
+    color: "#EEEEEE",
   },
-  countdown: {
-    marginTop: 8,
-    borderColor: "black",
-    borderWidth: 0.5,
+
+  totalTimeContainer: {
     marginHorizontal: 8,
-    borderRadius: 4,
-    paddingVertical: 16,
-    backgroundColor: "#fefefe",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    marginVertical: 8,
   },
   upNextText: {
-    fontSize: 18,
+    fontSize: 16,
+    color: "#EEEEEE",
+  },
+  upNextContainer: {
+    backgroundColor: "#00ADB5",
+    marginHorizontal: 16,
+    padding: 8,
+    borderRadius: 8,
+    width: "20%",
   },
 });

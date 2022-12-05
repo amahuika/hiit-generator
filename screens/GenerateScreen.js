@@ -23,6 +23,7 @@ function WorkoutScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
   const [exerciseList, setExerciseList] = useState([]);
   const [workout, setWorkout] = useState([]);
+
   // 20sec * 3
   // 10sec rest
   // 45 sec rest
@@ -80,25 +81,31 @@ function WorkoutScreen({ route, navigation }) {
     // const round3 = workoutOrder.filter((item) => item.round === 3);
     // const round4 = workoutOrder.filter((item) => item.round === 4);
 
-    // console.log("total length: " + workoutOrder.length);
-    // console.log("Round 1 length: " + round1.length);
-    // console.log("Round 2 length: " + round2.length);
-    // console.log("Round 3 length " + round3.length);
-    // console.log("Round 4 length " + round4.length);
-
     // let workoutOrderList = [...round1, ...round2, ...round3, ...round4];
 
     // AddBreaks(workoutOrderList);
     AddBreaks(workoutOrder);
 
-    // setWorkout((val) => [...workoutOrderList]);
+    const lastElementIndex = workoutOrder.length - 1;
+    if (
+      workoutOrder[lastElementIndex].title === "Break" ||
+      workoutOrder[lastElementIndex].title === "Rest"
+    ) {
+      workoutOrder.pop();
+    }
+    workoutOrder.unshift({ title: "Get Ready", length: 10 });
+
     setWorkout((val) => [...workoutOrder]);
+
+    // setWorkout((val) => [...workoutOrder]);
 
     return;
   }
 
   function startHandler() {
-    navigation.navigate("workout", { workout: workout });
+    navigation.navigate("workout", {
+      workout: workout,
+    });
   }
 
   return (

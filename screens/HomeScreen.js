@@ -1,6 +1,5 @@
 import { View, StyleSheet } from "react-native";
 import MyButton from "../components/MyButton";
-import { LinearGradient } from "expo-linear-gradient";
 
 function HomeScreen({ route, navigation }) {
   function getStartedHandle() {
