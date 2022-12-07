@@ -7,6 +7,7 @@ export function GetExercises(arrayOfExercises, round) {
     round: round,
     title: arrayOfExercises[randNum].name,
     description: arrayOfExercises[randNum].description,
+    type: arrayOfExercises[randNum].type,
   };
   arrayOfExercises.splice(randNum, 1);
   return exercise;
@@ -47,8 +48,8 @@ export function GetWorkoutOrder(exercisesArr, requiredMinutes) {
       }
     }
   }
-  console.log("total workout time " + totalWorkoutTime);
-  console.log("Required time " + requiredMinutes * 60);
+  // console.log("total workout time " + totalWorkoutTime);
+  // console.log("Required time " + requiredMinutes * 60);
 
   return exerciseOrder;
 }
@@ -65,7 +66,7 @@ export function AddBreaks(workoutList) {
         length: 45,
         round: round,
       };
-      console.log("24th");
+      // console.log("24th");
     }
     count++;
   }

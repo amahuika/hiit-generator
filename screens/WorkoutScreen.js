@@ -47,8 +47,6 @@ function WorkoutScreen({ route, navigation }) {
         </View>
       );
     },
-    // headerStyle: { backgroundColor: "#222831" },
-    // headerTitleStyle: { fontSize: 36, color: "#00ADB5" },
   });
   // 20sec * 3
   // 10sec rest

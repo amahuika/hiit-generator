@@ -9,6 +9,7 @@ import {
 import ExerciseContainer from "../components/ExerciseContainer";
 import MyButton from "../components/MyButton";
 
+import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import { AllExercises } from "../exerciseData/ExerciseData";
 
 const AllData = AllExercises;
@@ -24,11 +25,12 @@ const AllData = AllExercises;
 
 // console.log(myData);
 
-function WorkoutScreen({ route, navigation }) {
+function GenerateScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
   const [exerciseList, setExerciseList] = useState([]);
   const [workout, setWorkout] = useState([]);
   const [totalTime, setTotalTime] = useState("");
+  const [allData, setAllData] = useState([]);
 
   // 20sec * 3
   // 10sec rest
@@ -39,21 +41,36 @@ function WorkoutScreen({ route, navigation }) {
   //   headerStyle: { backgroundColor: "#EEEEEE" },
   //   title: "Your Workout",
   // });
+  const allExercises = route.params.allData;
   const userMinutes = route.params.minutes;
   useEffect(() => {
     setMinutes(userMinutes);
-
-    generateHandler();
+    setAllData(allExercises);
+    if (allData.length > 0) {
+      generateHandler();
+    }
   }, [minutes]);
+  //to do
+  // load all data from database on page before then pass when navigate over
 
   function generateHandler() {
     Keyboard.dismiss();
-    const UpperBody = [...AllData.UpperBody];
-    const LowerBody = [...AllData.LowerBody];
-    const Core = [...AllData.Core];
-    const FullBody = [...AllData.FullBody];
 
-    let totalWorkoutLength = 0;
+    const UpperBody = allData.filter(
+      (exercise) => exercise.type === "Upper Body"
+    );
+    const LowerBody = allData.filter(
+      (exercise) => exercise.type === "Lower Body"
+    );
+    const Core = allData.filter((exercise) => exercise.type === "Core");
+    const FullBody = allData.filter(
+      (exercise) => exercise.type === "Full Body"
+    );
+
+    // const UpperBody = [...AllData.UpperBody];
+    // const LowerBody = [...AllData.LowerBody];
+    // const Core = [...AllData.Core];
+    // const FullBody = [...AllData.FullBody];
 
     let workoutOrder = [];
     const exercises = [];
@@ -139,7 +156,7 @@ function WorkoutScreen({ route, navigation }) {
     </View>
   );
 }
-export default WorkoutScreen;
+export default GenerateScreen;
 
 const styles = StyleSheet.create({
   container: {

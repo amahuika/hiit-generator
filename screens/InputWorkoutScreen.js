@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, TextInput } from "react-native";
 import MyButton from "../components/MyButton";
+import { DatabaseConnection } from "../assets/database/DatabaseConnection";
+
+const db = DatabaseConnection.getConnection();
 
 function InputWorkoutScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(20);
   const [validInput, setValidInput] = useState(true);
+  const [allData, setAllData] = useState([]);
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM exercises", [], (tx, results) => {
+        setAllData((val) => [...results.rows._array]);
+      });
+    });
+  }, []);
 
   function generateHandler() {
     if (minutes > 60) {
       setValidInput(false);
       return;
     }
-    navigation.navigate("generator", { minutes: minutes });
+    navigation.navigate("generator", { minutes: minutes, allData: allData });
   }
   return (
     <View style={styles.container}>
