@@ -14,9 +14,10 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*", "assets/**"],
+    "packagerOpts": {
+      "assetExts": ["db"]
+    },
     "ios": {
       "supportsTablet": true
     },

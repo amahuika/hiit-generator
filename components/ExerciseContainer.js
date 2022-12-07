@@ -42,28 +42,28 @@ function ExerciseContainer({ workoutList }) {
 
   const round1results = round1.map((item) => (
     <Exercises
-      key={item.title}
+      key={item.id}
       title={item.title}
       description={item.description}
     />
   ));
   const round2results = round2.map((item) => (
     <Exercises
-      key={item.title}
+      key={item.id}
       title={item.title}
       description={item.description}
     />
   ));
   const round3results = round3.map((item) => (
     <Exercises
-      key={item.title}
+      key={item.id}
       title={item.title}
       description={item.description}
     />
   ));
   const round4results = round4.map((item) => (
     <Exercises
-      key={item.title}
+      key={item.id}
       title={item.title}
       description={item.description}
     />

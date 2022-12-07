@@ -2,9 +2,10 @@ export function GetExercises(arrayOfExercises, round) {
   let exercise;
   const randNum = Math.floor(Math.random() * arrayOfExercises.length);
   exercise = {
+    id: arrayOfExercises[randNum].id,
     length: 20,
     round: round,
-    title: arrayOfExercises[randNum].exercise,
+    title: arrayOfExercises[randNum].name,
     description: arrayOfExercises[randNum].description,
   };
   arrayOfExercises.splice(randNum, 1);

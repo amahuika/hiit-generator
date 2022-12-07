@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Keyboard, ScrollView, StyleSheet, View } from "react-native";
 import {
   AddBreaks,
   displayTimeRemaining,
@@ -19,6 +12,17 @@ import MyButton from "../components/MyButton";
 import { AllExercises } from "../exerciseData/ExerciseData";
 
 const AllData = AllExercises;
+
+// const myData = AllData.UpperBody.map((item) => {
+//   return {
+//     id: item.id,
+//     name: item.name,
+//     description: item.description,
+//     type: "Upper Body",
+//   };
+// });
+
+// console.log(myData);
 
 function WorkoutScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
