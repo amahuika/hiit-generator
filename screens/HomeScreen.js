@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, Button } from "react-native";
 import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import { useEffect, useState } from "react";
@@ -14,30 +14,6 @@ function HomeScreen({ route, navigation }) {
     navigation.navigate("input");
   }
 
-  // seed database functions
-  function seedRounds() {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM rounds",
-        [],
-        (txt, results) => {
-          console.log(results.rows.length);
-          if (results.rows.length === 0) {
-            tx.executeSql("INSERT INTO rounds (name) VALUES (?),(?),(?),(?) ", [
-              "Round 1",
-              "Round 2",
-              "Round 3",
-              "Round 4",
-            ]);
-          }
-        },
-        (txt, error) => {
-          console.log(error.message);
-        }
-      );
-    });
-  }
-
   // seed database function
   function seedExercises() {
     db.transaction((tx) => {
@@ -45,7 +21,6 @@ function HomeScreen({ route, navigation }) {
         "SELECT * FROM exercises",
         [],
         (tx, result) => {
-          console.log(result.rows.length);
           if (result.rows.length === 0) {
             for (const exercise of updatedExercises) {
               tx.executeSql(
@@ -67,9 +42,39 @@ function HomeScreen({ route, navigation }) {
     createTable();
 
     // seeding data
-    seedRounds();
     seedExercises();
   }, []);
+
+  function savedWorkoutsHandler() {
+    navigation.navigate("myWorkouts");
+  }
+
+  function myWorkoutTitleHandler(id) {
+    console.log(id);
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM saved_workouts WHERE id = ?",
+        [id],
+        (tx, results) => {
+          // console.log(results.rows.length);
+          if (results.rows.length > 0) {
+            const workout = results.rows.item(0);
+            tx.executeSql(
+              `SELECT exercises.description, exercises.type, exercises.name, workout_junction.round
+           FROM exercises INNER JOIN
+           workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
+           saved_workouts ON workout_junction.workout_id = saved_Workouts.id
+           WHERE saved_workouts.id = ?`,
+              [id],
+              (tx, result) => {
+                console.log(result.rows._array);
+              }
+            );
+          }
+        }
+      );
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -80,6 +85,12 @@ function HomeScreen({ route, navigation }) {
         txtStyle={styles.buttonText}
         style={styles.button}
         text="Get Started"
+      />
+      <MyButton
+        onPress={savedWorkoutsHandler}
+        txtStyle={styles.buttonText}
+        style={styles.button}
+        text="Saved Workouts"
       />
 
       {/* </View> */}
@@ -99,6 +110,7 @@ const styles = StyleSheet.create({
   buttonContainer: {},
   button: {
     backgroundColor: "#00ADB5",
+    marginVertical: 16,
   },
   buttonText: {
     fontSize: 24,

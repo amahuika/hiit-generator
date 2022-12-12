@@ -7,6 +7,7 @@ import HomeScreen from "./screens/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import WorkoutScreen from "./screens/WorkoutScreen";
 import InputWorkoutScreen from "./screens/InputWorkoutScreen";
+import MyWorkoutsScreen from "./screens/MyWorkoutsScreen";
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,11 @@ export default function App() {
             name="home"
             component={HomeScreen}
             options={{ title: "Workout Generator" }}
+          />
+          <Stack.Screen
+            name="myWorkouts"
+            component={MyWorkoutsScreen}
+            options={{ title: "My Workouts" }}
           />
           <Stack.Screen
             name="input"

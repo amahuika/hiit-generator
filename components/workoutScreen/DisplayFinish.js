@@ -9,22 +9,20 @@ const db = DatabaseConnection.getConnection();
 
 function DisplayFinish({ totalTime, exercises }) {
   const [showModal, setShowModal] = useState(false);
-  const [lastId, setLastId] = useState();
+  const [isSaved, setIsSaved] = useState(false);
   const navigation = useNavigation();
 
   exercises.shift();
-  const restLength = exercises.find((item) => item.title === "Rest");
+  const rest = exercises.find((item) => item.title === "Rest");
+  const restLength = rest.length;
   const checkForBreak = exercises.find((item) => item.title === "Break");
-  let breakLength;
-  if (checkForBreak !== undefined) {
-    breakLength = checkForBreak.length;
-  }
+  const breakLength = checkForBreak !== undefined ? checkForBreak.length : null;
 
   const filterOutBreaks = exercises.filter((item) => {
-    return item.title !== "Rest";
+    return item.title !== "Rest" && item.title !== "Break";
   });
 
-  const filtered = filterOutBreaks.filter(
+  const filteredExercises = filterOutBreaks.filter(
     (value, index, array) => array.indexOf(value) === index
   );
 
@@ -32,33 +30,40 @@ function DisplayFinish({ totalTime, exercises }) {
     showModal ? setShowModal(false) : setShowModal(true);
   }
 
-  function saveWorkoutHandler() {
-    // HOW TO CHECK IF SOMETHING EXSITIS IN DATABASE
-    // db.transaction((tx) => {
-    //   tx.executeSql(
-    //     "SELECT EXISTS(SELECT 1 FROM rounds WHERE name='Round 4')",
-    //     [],
-    //     (txt, results) => {
-    //       console.log(results.rows._array);
-    //     }
-    //   );
-    // });
-    // db.transaction((tx) => {
-    //   tx.executeSql(
-    //     "INSERT INTO saved_workouts ( name, length, rest, break) VALUES (?,?,?,?)",
-    //     ["Test Workout", "1.30", 20, null],
-    //     (transaction, resultSet) => {
-    //       setLastId(resultSet.insertId);
-    //       tx.executeSql(
-    //         `SELECT * FROM saved_workouts WHERE id = ${resultSet.insertId}`,
-    //         [],
-    //         (txt, resultSet) => {
-    //           console.log(resultSet.rows._array);
-    //         }
-    //       );
-    //     }
-    //   );
-    // });
+  function saveWorkoutHandler(workoutName) {
+    let lastId;
+    modalHandler();
+    console.log("Saved! " + workoutName);
+    // console.log(filtered.map((item) => item.round));
+    console.log(restLength);
+    console.log(breakLength);
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO saved_workouts (name, length, rest, break) VALUES (?,?,?,?)",
+        [workoutName, totalTime, restLength, breakLength],
+        (tx, results) => {
+          console.log("workout id entered " + results.insertId);
+          if (results.insertId > 0) {
+            lastId = results.insertId;
+          }
+        }
+      );
+    });
+
+    db.transaction((tx) => {
+      for (const exercise of filteredExercises) {
+        tx.executeSql(
+          "INSERT INTO workout_junction (workout_id, exercise_id, round) VALUES (?,?,?)",
+          [lastId, exercise.id, exercise.round],
+          null,
+          (tx, error) => {
+            console.log(error.message);
+          }
+        );
+      }
+    });
+    setIsSaved(true);
   }
 
   function insertData() {}
@@ -69,11 +74,15 @@ function DisplayFinish({ totalTime, exercises }) {
 
   return (
     <View style={styles.container}>
-      <SaveWorkoutModal toggle={modalHandler} showModal={showModal} />
+      <SaveWorkoutModal
+        toggle={modalHandler}
+        showModal={showModal}
+        saveHandler={saveWorkoutHandler}
+      />
       <View style={styles.innerContainer}>
         <Text style={styles.congratulationText}>Congratulations!</Text>
         <Text style={styles.mainText}>Total time: {totalTime}</Text>
-        {/* <Text style={styles.mainText}>Total Exercises: {}</Text> */}
+
         <Text style={styles.amazingText}>You are amazing!</Text>
       </View>
       <View>
@@ -81,7 +90,7 @@ function DisplayFinish({ totalTime, exercises }) {
           style={styles.button}
           text="Save Workout"
           txtStyle={styles.buttonText}
-          onPress={saveWorkoutHandler}
+          onPress={modalHandler}
         />
         <MyButton
           style={styles.button}

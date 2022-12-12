@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Keyboard, ScrollView, StyleSheet, View } from "react-native";
+import { Keyboard, ScrollView, StyleSheet, View, Text } from "react-native";
 import {
   AddBreaks,
   displayTimeRemaining,
@@ -10,20 +10,7 @@ import ExerciseContainer from "../components/ExerciseContainer";
 import MyButton from "../components/MyButton";
 
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
-import { AllExercises } from "../exerciseData/ExerciseData";
-
-const AllData = AllExercises;
-
-// const myData = AllData.UpperBody.map((item) => {
-//   return {
-//     id: item.id,
-//     name: item.name,
-//     description: item.description,
-//     type: "Upper Body",
-//   };
-// });
-
-// console.log(myData);
+import Card from "../components/Card";
 
 function GenerateScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
@@ -93,6 +80,7 @@ function GenerateScreen({ route, navigation }) {
         GetExercises(Core, round),
         GetExercises(FullBody, round)
       );
+
       round++;
     }
 
@@ -137,6 +125,9 @@ function GenerateScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      <Card>
+        <Text>Total Time: {totalTime}</Text>
+      </Card>
       <ScrollView
         style={styles.exerciseList}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -179,6 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   exerciseList: {
-    paddingTop: 16,
+    paddingTop: 8,
   },
 });
