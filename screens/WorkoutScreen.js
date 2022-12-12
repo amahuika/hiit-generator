@@ -36,9 +36,10 @@ function WorkoutScreen({ route, navigation }) {
   }
   const workout = route.params.workout;
   const totalTimeInMinutes = route.params.totalTime;
+  const workoutName = route.params.workoutName;
 
   navigation.setOptions({
-    // title: "Exercise",
+    title: workoutName === null ? "Hiit Generator" : workoutName,
     headerLeft: () => null,
     headerRight: () => {
       return (

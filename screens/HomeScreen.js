@@ -51,32 +51,7 @@ function HomeScreen({ route, navigation }) {
     navigation.navigate("myWorkouts");
   }
 
-  function myWorkoutTitleHandler(id) {
-    console.log(id);
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM saved_workouts WHERE id = ?",
-        [id],
-        (tx, results) => {
-          // console.log(results.rows.length);
-          if (results.rows.length > 0) {
-            const workout = results.rows.item(0);
-            tx.executeSql(
-              `SELECT exercises.description, exercises.type, exercises.name, workout_junction.round
-           FROM exercises INNER JOIN
-           workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
-           saved_workouts ON workout_junction.workout_id = saved_Workouts.id
-           WHERE saved_workouts.id = ?`,
-              [id],
-              (tx, result) => {
-                console.log(result.rows._array);
-              }
-            );
-          }
-        }
-      );
-    });
-  }
+  function exercisesHandler() {}
 
   return (
     <View style={styles.container}>
@@ -94,6 +69,12 @@ function HomeScreen({ route, navigation }) {
         style={styles.button}
         text="Saved Workouts"
       />
+      {/* <MyButton
+        onPress={exercisesHandler}
+        txtStyle={styles.buttonText}
+        style={styles.button}
+        text="Exercises"
+      /> */}
 
       {/* </View> */}
     </View>

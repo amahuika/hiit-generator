@@ -104,6 +104,7 @@ function GenerateScreen({ route, navigation }) {
     navigation.navigate("workout", {
       workout: workout,
       totalTime: totalTime,
+      workoutName: null,
     });
   }
 

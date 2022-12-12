@@ -65,6 +65,7 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
     navigation.navigate("workout", {
       workout: workoutOrder,
       totalTime: totalTime,
+      workoutName: workout.name,
     });
   }
 
