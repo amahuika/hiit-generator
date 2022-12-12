@@ -21,6 +21,7 @@ function HomeScreen({ route, navigation }) {
         "SELECT * FROM exercises",
         [],
         (tx, result) => {
+          console.log(result.rows.length);
           if (result.rows.length === 0) {
             for (const exercise of updatedExercises) {
               tx.executeSql(
@@ -32,6 +33,7 @@ function HomeScreen({ route, navigation }) {
         },
         (tx, error) => {
           console.log(error.message);
+          console.log(error.code);
         }
       );
     });

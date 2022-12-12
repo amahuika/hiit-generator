@@ -47,8 +47,22 @@ function MyWorkoutsScreen({ route, navigation }) {
     ]);
   }
 
-  function onViewWorkout() {
-    console.log("View my workout");
+  function onViewWorkout(workout) {
+    // db.transaction((tx) => {
+    //   tx.executeSql(
+    //     `SELECT exercises.description, exercises.type, exercises.name, workout_junction.round
+    //        FROM exercises INNER JOIN
+    //        workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
+    //        saved_workouts ON workout_junction.workout_id = saved_Workouts.id
+    //        WHERE saved_workouts.id = ?`,
+    //     [id],
+    //     (tx, result) => {
+    //       console.log(result.rows._array);
+    //     }
+    //   );
+    // });
+
+    navigation.navigate("displaySavedWorkout", { workout: workout });
   }
 
   return (
@@ -57,7 +71,9 @@ function MyWorkoutsScreen({ route, navigation }) {
         return (
           <View>
             <Pressable
-              onPress={onViewWorkout}
+              onPress={() => {
+                onViewWorkout(item);
+              }}
               android_ripple={{ color: "#fefefe" }}
               style={styles.workoutButton}
             >

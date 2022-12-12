@@ -8,6 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import WorkoutScreen from "./screens/WorkoutScreen";
 import InputWorkoutScreen from "./screens/InputWorkoutScreen";
 import MyWorkoutsScreen from "./screens/MyWorkoutsScreen";
+import DisplaySavedWorkoutScreen from "./screens/DisplaySavedWorkoutScreen";
 
 const Stack = createStackNavigator();
 
@@ -37,6 +38,10 @@ export default function App() {
             name="myWorkouts"
             component={MyWorkoutsScreen}
             options={{ title: "My Workouts" }}
+          />
+          <Stack.Screen
+            name="displaySavedWorkout"
+            component={DisplaySavedWorkoutScreen}
           />
           <Stack.Screen
             name="input"

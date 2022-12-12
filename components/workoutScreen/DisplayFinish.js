@@ -32,7 +32,6 @@ function DisplayFinish({ totalTime, exercises }) {
 
   function saveWorkoutHandler(workoutName) {
     let lastId;
-    modalHandler();
     console.log("Saved! " + workoutName);
     // console.log(filtered.map((item) => item.round));
     console.log(restLength);
@@ -63,6 +62,9 @@ function DisplayFinish({ totalTime, exercises }) {
         );
       }
     });
+
+    modalHandler();
+
     setIsSaved(true);
   }
 
@@ -88,9 +90,11 @@ function DisplayFinish({ totalTime, exercises }) {
       <View>
         <MyButton
           style={styles.button}
-          text="Save Workout"
+          text={!isSaved ? "Save Workout" : "Workout Saved!"}
           txtStyle={styles.buttonText}
-          onPress={modalHandler}
+          onPress={() => {
+            if (!isSaved) modalHandler();
+          }}
         />
         <MyButton
           style={styles.button}

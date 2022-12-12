@@ -18,7 +18,6 @@ export function createTable() {
     (error, result) => {}
   );
   db.transaction((tx) => {
-    // tx.executeSql("DROP TABLE rounds");
     // tx.executeSql("DROP TABLE saved_workouts");
     // tx.executeSql("DROP TABLE workout_junction");
     // tx.executeSql("DROP TABLE exercises");
