@@ -19,6 +19,7 @@ export function createTable() {
   );
   db.transaction((tx) => {
     // tx.executeSql("DROP TABLE saved_workouts");
+
     // tx.executeSql("DROP TABLE workout_junction");
     // tx.executeSql("DROP TABLE exercises");
 
@@ -31,7 +32,7 @@ export function createTable() {
       []
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS workout_junction (id INTEGER PRIMARY KEY AUTOINCREMENT, workout_id INTEGER REFERENCES saved_workouts(id), exercise_id INTEGER REFERENCES exercises(id), round INTEGER)",
+      "CREATE TABLE IF NOT EXISTS workout_junction (id INTEGER PRIMARY KEY AUTOINCREMENT, round INTEGER, workout_id INTEGER REFERENCES saved_workouts(id), exercise_id INTEGER REFERENCES exercises(id))",
       []
     );
   });

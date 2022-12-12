@@ -24,6 +24,7 @@ function MyWorkoutsScreen({ route, navigation }) {
   }
 
   function onDeleteWorkout(workoutId) {
+    console.log(workoutId);
     Alert.alert("Are you sure?", "This workout will be permanently deleted", [
       {
         text: "Cancel",
@@ -34,9 +35,14 @@ function MyWorkoutsScreen({ route, navigation }) {
         text: "OK",
         onPress: () => {
           db.transaction((tx) => {
-            tx.executeSql("DELETE FROM workout_junction WHERE workout_id = ?", [
-              workoutId,
-            ]);
+            tx.executeSql(
+              "DELETE FROM workout_junction WHERE workout_id = ?",
+              [workoutId],
+              (tx, results) => {},
+              (tx, error) => {
+                console.log(error.message);
+              }
+            );
             tx.executeSql("DELETE FROM saved_workouts WHERE id = ?", [
               workoutId,
             ]);
@@ -48,20 +54,8 @@ function MyWorkoutsScreen({ route, navigation }) {
   }
 
   function onViewWorkout(workout) {
-    // db.transaction((tx) => {
-    //   tx.executeSql(
-    //     `SELECT exercises.description, exercises.type, exercises.name, workout_junction.round
-    //        FROM exercises INNER JOIN
-    //        workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
-    //        saved_workouts ON workout_junction.workout_id = saved_Workouts.id
-    //        WHERE saved_workouts.id = ?`,
-    //     [id],
-    //     (tx, result) => {
-    //       console.log(result.rows._array);
-    //     }
-    //   );
-    // });
-
+    console.log(workout);
+    // navigation.navigate("displaySavedWorkout", { workout: workout });
     navigation.navigate("displaySavedWorkout", { workout: workout });
   }
 
@@ -69,7 +63,7 @@ function MyWorkoutsScreen({ route, navigation }) {
     <View style={styles.container}>
       {myWorkoutList.map((item) => {
         return (
-          <View>
+          <View key={item.id}>
             <Pressable
               onPress={() => {
                 onViewWorkout(item);

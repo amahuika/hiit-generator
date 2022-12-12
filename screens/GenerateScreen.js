@@ -87,24 +87,7 @@ function GenerateScreen({ route, navigation }) {
     setExerciseList(exercises);
     workoutOrder = GetWorkoutOrder(exercises, minutes);
 
-    // const round1 = workoutOrder.filter((item) => item.round === 1);
-    // const round2 = workoutOrder.filter((item) => item.round === 2);
-    // const round3 = workoutOrder.filter((item) => item.round === 3);
-    // const round4 = workoutOrder.filter((item) => item.round === 4);
-
-    // let workoutOrderList = [...round1, ...round2, ...round3, ...round4];
-
-    // AddBreaks(workoutOrderList);
     AddBreaks(workoutOrder);
-
-    const lastElementIndex = workoutOrder.length - 1;
-    if (
-      workoutOrder[lastElementIndex].title === "Break" ||
-      workoutOrder[lastElementIndex].title === "Rest"
-    ) {
-      workoutOrder.pop();
-    }
-    workoutOrder.unshift({ title: "Get Ready", length: 10 });
 
     setWorkout((val) => [...workoutOrder]);
 
@@ -117,6 +100,7 @@ function GenerateScreen({ route, navigation }) {
   }
 
   function startHandler() {
+    // console.log(workout);
     navigation.navigate("workout", {
       workout: workout,
       totalTime: totalTime,

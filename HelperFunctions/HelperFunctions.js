@@ -5,7 +5,7 @@ export function GetExercises(arrayOfExercises, round) {
     id: arrayOfExercises[randNum].id,
     length: 20,
     round: round,
-    title: arrayOfExercises[randNum].name,
+    name: arrayOfExercises[randNum].name,
     description: arrayOfExercises[randNum].description,
     type: arrayOfExercises[randNum].type,
   };
@@ -25,19 +25,19 @@ export function GetWorkoutOrder(exercisesArr, requiredMinutes) {
           exercisesArr[i],
           {
             round: exercisesArr[i].round,
-            title: "Rest",
+            name: "Rest",
             length: 10,
           },
           exercisesArr[i],
           {
             round: exercisesArr[i].round,
-            title: "Rest",
+            name: "Rest",
             length: 10,
           },
           exercisesArr[i],
           {
             round: exercisesArr[i].round,
-            title: "Rest",
+            name: "Rest",
             length: 10,
           }
         );
@@ -62,7 +62,7 @@ export function AddBreaks(workoutList) {
     let round = workoutList[i].round;
     if (count % 24 === 0) {
       workoutList[i] = {
-        title: "Break",
+        name: "Break",
         length: 45,
         round: round,
       };
@@ -73,6 +73,15 @@ export function AddBreaks(workoutList) {
   if (length === 24) {
     workoutList.pop();
   }
+
+  const lastElementIndex = workoutList.length - 1;
+  if (
+    workoutList[lastElementIndex].name === "Break" ||
+    workoutList[lastElementIndex].name === "Rest"
+  ) {
+    workoutList.pop();
+  }
+  workoutList.unshift({ name: "Get Ready", length: 10 });
 }
 
 export function displayTimeRemaining(totalSeconds) {

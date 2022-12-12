@@ -25,7 +25,7 @@ function WorkoutScreen({ route, navigation }) {
   const [totalTime, setTotalTime] = useState();
   const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
   const [currentExercise, setCurrentExercise] = useState({
-    title: "",
+    name: "",
     length: 0,
     description: "",
   });
@@ -125,7 +125,9 @@ function WorkoutScreen({ route, navigation }) {
         {
           text: "OK",
           onPress: () => {
-            navigation.navigate("generator", { minutes: 0 });
+            navigation.goBack();
+            // navigation.navigate("generator", { minutes: 0 });
+
             // setHasStarted(false);
             // setIsFinished(false);
           },
@@ -164,7 +166,7 @@ function WorkoutScreen({ route, navigation }) {
       {!isFinished && (
         <CountdownDisplay
           count={timer}
-          title={currentExercise.title}
+          title={currentExercise.name}
           description={currentExercise.description}
         />
       )}
@@ -186,7 +188,7 @@ function WorkoutScreen({ route, navigation }) {
         {workoutList.map((item) => {
           return (
             <DisplayExercise
-              title={item.title}
+              title={item.name}
               length={item.length}
               description={item.description}
             />

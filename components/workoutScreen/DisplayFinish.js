@@ -13,13 +13,13 @@ function DisplayFinish({ totalTime, exercises }) {
   const navigation = useNavigation();
 
   exercises.shift();
-  const rest = exercises.find((item) => item.title === "Rest");
+  const rest = exercises.find((item) => item.name === "Rest");
   const restLength = rest.length;
-  const checkForBreak = exercises.find((item) => item.title === "Break");
+  const checkForBreak = exercises.find((item) => item.name === "Break");
   const breakLength = checkForBreak !== undefined ? checkForBreak.length : null;
 
   const filterOutBreaks = exercises.filter((item) => {
-    return item.title !== "Rest" && item.title !== "Break";
+    return item.name !== "Rest" && item.name !== "Break";
   });
 
   const filteredExercises = filterOutBreaks.filter(
