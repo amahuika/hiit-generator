@@ -33,10 +33,14 @@ function GenerateScreen({ route, navigation }) {
   useEffect(() => {
     setMinutes(userMinutes);
     setAllData(allExercises);
-    if (allData.length > 0) {
+
+    if (allData.length > 0 && exerciseList.length === 0) {
       generateHandler();
     }
-  }, [minutes]);
+    if (exerciseList.length > 0) {
+      MyWorkoutOrder();
+    }
+  }, [minutes, exerciseList]);
   //to do
   // load all data from database on page before then pass when navigate over
 
@@ -84,7 +88,43 @@ function GenerateScreen({ route, navigation }) {
       round++;
     }
 
-    setExerciseList(exercises);
+    let addedBreaks = [];
+    if (exercises.length > 4) {
+      addedBreaks.push(exercises[0]);
+      for (let i = 1; i < exercises.length; i++) {
+        if (i % 4 === 0) {
+          addedBreaks.push({
+            id: Math.random() * i,
+            length: 45,
+            round: exercises[i].round,
+            name: "Break",
+          });
+        }
+        addedBreaks.push(exercises[i]);
+      }
+    } else {
+      addedBreaks = exercises;
+    }
+    // setExerciseList(exercises);
+    setExerciseList(addedBreaks);
+
+    // workoutOrder = GetWorkoutOrder(exercises, minutes);
+
+    // AddBreaks(workoutOrder);
+
+    // setWorkout((val) => [...workoutOrder]);
+
+    // let totalInSeconds = 0;
+    // workoutOrder.map((item) => (totalInSeconds += item.length));
+    // setTotalTime(displayTimeRemaining(totalInSeconds));
+    // setWorkout((val) => [...workoutOrder]);
+
+    return;
+  }
+
+  function MyWorkoutOrder() {
+    let workoutOrder;
+    const exercises = exerciseList.filter((item) => item.name !== "Break");
     workoutOrder = GetWorkoutOrder(exercises, minutes);
 
     AddBreaks(workoutOrder);
@@ -94,9 +134,6 @@ function GenerateScreen({ route, navigation }) {
     let totalInSeconds = 0;
     workoutOrder.map((item) => (totalInSeconds += item.length));
     setTotalTime(displayTimeRemaining(totalInSeconds));
-    // setWorkout((val) => [...workoutOrder]);
-
-    return;
   }
 
   function startHandler() {
@@ -108,16 +145,35 @@ function GenerateScreen({ route, navigation }) {
     });
   }
 
+  function onRefreshExercise(exercise, index) {
+    const newExercise = allData.filter((item) => item.type === exercise.type);
+
+    const selected = GetExercises(newExercise, exercise.round);
+    let cloneExerciseList = [...exerciseList];
+
+    cloneExerciseList[index] = selected;
+    console.log(cloneExerciseList);
+    setExerciseList((val) => [...cloneExerciseList]);
+  }
+  console.log("exercise list " + exerciseList.length);
   return (
     <View style={styles.container}>
       <Card>
+        <Text>Each Exercise: 20 sec x3</Text>
+        <Text>Rest between exercises: 10 sec</Text>
+        <Text>Break: 45 sec</Text>
+        <Text>sequence is continued until timer is finished</Text>
         <Text>Total Time: {totalTime}</Text>
       </Card>
       <ScrollView
         style={styles.exerciseList}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <ExerciseContainer workoutList={exerciseList} />
+        <ExerciseContainer
+          workoutList={exerciseList}
+          onRefresh={onRefreshExercise}
+          fromSaved={false}
+        />
       </ScrollView>
       {workout.length > 0 && (
         <View>
@@ -137,6 +193,7 @@ export default GenerateScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 8,
     paddingHorizontal: 16,
     backgroundColor: "#222831",
   },
@@ -154,7 +211,5 @@ const styles = StyleSheet.create({
     // color: "#EEEEEE",
     fontSize: 24,
   },
-  exerciseList: {
-    paddingTop: 8,
-  },
+  exerciseList: {},
 });

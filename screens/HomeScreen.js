@@ -33,7 +33,6 @@ function HomeScreen({ route, navigation }) {
         },
         (tx, error) => {
           console.log(error.message);
-          console.log(error.code);
         }
       );
     });
@@ -61,7 +60,7 @@ function HomeScreen({ route, navigation }) {
         onPress={getStartedHandle}
         txtStyle={styles.buttonText}
         style={styles.button}
-        text="Get Started"
+        text="Generate a workout"
       />
       <MyButton
         onPress={savedWorkoutsHandler}
@@ -69,12 +68,12 @@ function HomeScreen({ route, navigation }) {
         style={styles.button}
         text="Saved Workouts"
       />
-      {/* <MyButton
+      <MyButton
         onPress={exercisesHandler}
         txtStyle={styles.buttonText}
         style={styles.button}
         text="Exercises"
-      /> */}
+      />
 
       {/* </View> */}
     </View>

@@ -39,7 +39,24 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
                   length: 20,
                 };
               });
-              setWorkoutList((_) => [...workouts]);
+              let addedBreaks = [];
+              if (workouts.length > 4) {
+                addedBreaks.push(workouts[0]);
+                for (let i = 1; i < workouts.length; i++) {
+                  if (i % 4 === 0) {
+                    addedBreaks.push({
+                      id: Math.random() * i,
+                      length: 45,
+                      round: workouts[i].round,
+                      name: "Break",
+                    });
+                  }
+                  addedBreaks.push(workouts[i]);
+                }
+              } else {
+                addedBreaks = workouts;
+              }
+              setWorkoutList((_) => [...addedBreaks]);
             }
           }
         );
@@ -48,8 +65,11 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
 
     if (workoutOrder.length === 0 && workoutList.length > 0) {
       const minutes = parseInt(workout.length.split(":")[0]);
-      console.log("list length " + workoutList.length);
-      let getWorkout = GetWorkoutOrder(workoutList, minutes);
+      // console.log("list length " + workoutList.length);
+      let workoutListUpdate = workoutList.filter(
+        (item) => item.name !== "Break"
+      );
+      let getWorkout = GetWorkoutOrder(workoutListUpdate, minutes);
 
       AddBreaks(getWorkout);
 
@@ -75,7 +95,7 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
         <Text>Total Time: {workout.length}</Text>
       </Card>
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <ExerciseContainer workoutList={workoutList} />
+        <ExerciseContainer workoutList={workoutList} fromSaved={true} />
       </ScrollView>
       <View>
         <MyButton

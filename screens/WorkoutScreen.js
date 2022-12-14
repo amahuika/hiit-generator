@@ -38,23 +38,23 @@ function WorkoutScreen({ route, navigation }) {
   const totalTimeInMinutes = route.params.totalTime;
   const workoutName = route.params.workoutName;
 
-  navigation.setOptions({
-    title: workoutName === null ? "Hiit Generator" : workoutName,
-    headerLeft: () => null,
-    headerRight: () => {
-      return (
-        <View style={styles.totalTimeContainer}>
-          <Text style={styles.totalTimeText}>{totalTime}</Text>
-        </View>
-      );
-    },
-  });
   // 20sec * 3
   // 10sec rest
   // 45 sec rest
   // repeat * 2
   // setCurrentRound(workout[0].round);
   useEffect(() => {
+    navigation.setOptions({
+      title: workoutName === null ? "Workout Generator" : workoutName,
+      headerLeft: () => null,
+      headerRight: () => {
+        return (
+          <View style={styles.totalTimeContainer}>
+            <Text style={styles.totalTimeText}>{totalTime}</Text>
+          </View>
+        );
+      },
+    });
     let countdown;
     let updatedTotal;
 
@@ -186,9 +186,10 @@ function WorkoutScreen({ route, navigation }) {
         style={{ marginHorizontal: 16 }}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {workoutList.map((item) => {
+        {workoutList.map((item, index) => {
           return (
             <DisplayExercise
+              key={index}
               title={item.name}
               length={item.length}
               description={item.description}
