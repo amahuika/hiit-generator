@@ -15,21 +15,30 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
   return (
     <View style={styles.showExerciseList}>
       <View style={showDescription && styles.exerciseTextContainer}>
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={styles.myTextExercise}>{exercise.name}</Text>
           {!fromSaved && (
             <Pressable
-              style={{ alignItems: "center", justifyContent: "center" }}
+              style={{ alignItems: "flex-start", justifyContent: "flex-start" }}
               onPress={() => onRefreshHandle(exercise, index)}
             >
               <Ionicons name="refresh" size={24} color="black" />
             </Pressable>
           )}
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 4,
+          }}
+        >
           <Text style={styles.myTextLength}>20sec x3</Text>
 
-          <Pressable onPress={showDescriptionHandle}>
+          <Pressable
+            onPress={showDescriptionHandle}
+            style={{ alignItems: "flex-end", justifyContent: "flex-end" }}
+          >
             <Ionicons
               name={!showDescription ? "chevron-down" : "chevron-up"}
               size={24}

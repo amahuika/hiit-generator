@@ -4,14 +4,14 @@ import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import { useEffect, useState } from "react";
 import { createTable } from "../HelperFunctions/DatabaseFunctions";
 
-import { updatedExercises } from "../exerciseData/ExerciseData";
+import { updatedExercises } from "../assets/exerciseData/ExerciseData";
 
 const db = DatabaseConnection.getConnection();
 
 function HomeScreen({ route, navigation }) {
   // get started handler
   function getStartedHandle() {
-    navigation.navigate("input");
+    navigation.navigate("selection");
   }
 
   // seed database function

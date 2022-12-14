@@ -2,7 +2,7 @@ export function GetExercises(arrayOfExercises, round) {
   let exercise;
   const randNum = Math.floor(Math.random() * arrayOfExercises.length);
   exercise = {
-    id: arrayOfExercises[randNum].id,
+    id: Math.random() * arrayOfExercises[randNum].id,
     length: 20,
     round: round,
     name: arrayOfExercises[randNum].name,

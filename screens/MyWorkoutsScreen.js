@@ -25,14 +25,14 @@ function MyWorkoutsScreen({ route, navigation }) {
 
   function onDeleteWorkout(workoutId) {
     console.log(workoutId);
-    Alert.alert("Are you sure?", "This workout will be permanently deleted", [
+    Alert.alert("Delete workout", "This workout will be permanently deleted.", [
       {
         text: "Cancel",
         onPress: () => console.log("Cancel Pressed"),
         style: "cancel",
       },
       {
-        text: "OK",
+        text: "Delete",
         onPress: () => {
           db.transaction((tx) => {
             tx.executeSql(
