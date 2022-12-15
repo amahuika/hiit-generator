@@ -19,15 +19,20 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
 
     if (workoutList.length === 0) {
       db.transaction((tx) => {
+        tx.executeSql("SELECT * FROM workout_junction", [], (tx, results) => {
+          console.log(results.rows._array);
+        });
+
         tx.executeSql(
-          `SELECT exercises.description, exercises.type, exercises.name, workout_junction.round
-       FROM exercises INNER JOIN
+          `SELECT exercises.id, exercises.name, exercises.description, category.name AS type
+       FROM exercises INNER JOIN 
        workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
-       saved_workouts ON workout_junction.workout_id = saved_Workouts.id
-       WHERE saved_workouts.id = ?`,
+       category ON exercises.category_id = category.id INNER JOIN
+       saved_workouts ON workout_junction.workout_id = saved_workouts.id
+       WHERE (saved_workouts.id = ?)`,
           [workout.id],
           (tx, results) => {
-            console.log("Query " + results.rows.length);
+            console.log("Query " + results.rows._array);
             if (results.rows.length > 0) {
               let workouts = results.rows._array.map((item) => {
                 return {
@@ -58,6 +63,10 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
               }
               setWorkoutList((_) => [...addedBreaks]);
             }
+          },
+          (tx, error) => {
+            console.log(error.message);
+            console.log(error.code);
           }
         );
       });

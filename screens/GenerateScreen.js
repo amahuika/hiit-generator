@@ -19,15 +19,6 @@ function GenerateScreen({ route, navigation }) {
   const [totalTime, setTotalTime] = useState("");
   const [allData, setAllData] = useState([]);
 
-  // 20sec * 3
-  // 10sec rest
-  // 45 sec rest
-  // repeat * 2
-
-  // navigation.setOptions({
-  //   headerStyle: { backgroundColor: "#EEEEEE" },
-  //   title: "Your Workout",
-  // });
   const allExercises = route.params.allData;
   const userMinutes = route.params.minutes;
   useEffect(() => {
@@ -41,8 +32,6 @@ function GenerateScreen({ route, navigation }) {
       MyWorkoutOrder();
     }
   }, [minutes, exerciseList]);
-  //to do
-  // load all data from database on page before then pass when navigate over
 
   function generateHandler() {
     Keyboard.dismiss();
@@ -57,11 +46,6 @@ function GenerateScreen({ route, navigation }) {
     const FullBody = allData.filter(
       (exercise) => exercise.type === "Full Body"
     );
-
-    // const UpperBody = [...AllData.UpperBody];
-    // const LowerBody = [...AllData.LowerBody];
-    // const Core = [...AllData.Core];
-    // const FullBody = [...AllData.FullBody];
 
     let workoutOrder = [];
     const exercises = [];
@@ -108,17 +92,6 @@ function GenerateScreen({ route, navigation }) {
     // setExerciseList(exercises);
     setExerciseList(addedBreaks);
 
-    // workoutOrder = GetWorkoutOrder(exercises, minutes);
-
-    // AddBreaks(workoutOrder);
-
-    // setWorkout((val) => [...workoutOrder]);
-
-    // let totalInSeconds = 0;
-    // workoutOrder.map((item) => (totalInSeconds += item.length));
-    // setTotalTime(displayTimeRemaining(totalInSeconds));
-    // setWorkout((val) => [...workoutOrder]);
-
     return;
   }
 
@@ -147,15 +120,19 @@ function GenerateScreen({ route, navigation }) {
 
   function onRefreshExercise(exercise, index) {
     const newExercise = allData.filter((item) => item.type === exercise.type);
-
-    const selected = GetExercises(newExercise, exercise.round);
     let cloneExerciseList = [...exerciseList];
+    // get new exercise with different id
+    let currentIds = cloneExerciseList.map((item) => item.id);
+    let selected;
+    do {
+      selected = GetExercises(newExercise, exercise.round);
+    } while (currentIds.includes(selected.id));
 
     cloneExerciseList[index] = selected;
     console.log(cloneExerciseList);
     setExerciseList((val) => [...cloneExerciseList]);
   }
-  console.log("exercise list " + exerciseList.length);
+  // console.log("exercise list " + exerciseList.length);
   return (
     <View style={styles.container}>
       <Card>

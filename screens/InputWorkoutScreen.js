@@ -64,11 +64,13 @@ function InputWorkoutScreen({ route, navigation }) {
     if (allData.length === 0) {
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM exercises",
+          `SELECT exercises.id, exercises.name, exercises.description, category.name AS type
+           FROM category INNER JOIN
+           exercises ON category.id = exercises.category_id`,
           [],
           (tx, results) => {
             const resultsData = results.rows._array;
-            console.log("results" + results.rows.length);
+            console.log(resultsData);
             setAllData((val) => [...resultsData]);
 
             const setItems = resultsData.map((item) => {

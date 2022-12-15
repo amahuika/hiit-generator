@@ -4,5 +4,5 @@ import * as SQLite from "expo-sqlite";
 // import * as SQLite from "react-native-sqlite-storage";
 
 export const DatabaseConnection = {
-  getConnection: () => SQLite.openDatabase("work_db.db"),
+  getConnection: () => SQLite.openDatabase("generator_db.db"),
 };

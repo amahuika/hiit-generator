@@ -2,9 +2,16 @@ import { View, StyleSheet, ScrollView, Text, Button } from "react-native";
 import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import { useEffect, useState } from "react";
-import { createTable } from "../HelperFunctions/DatabaseFunctions";
+import { createTable, dropTables } from "../HelperFunctions/DatabaseFunctions";
 
 import { updatedExercises } from "../assets/exerciseData/ExerciseData";
+
+// Upper Body = 1
+// Lower Body = 2
+// Core = 3
+// Full Body = 4
+
+const categorySeed = ["Upper Body", "Lower Body", "Core", "Full Body"];
 
 const db = DatabaseConnection.getConnection();
 
@@ -12,6 +19,28 @@ function HomeScreen({ route, navigation }) {
   // get started handler
   function getStartedHandle() {
     navigation.navigate("selection");
+  }
+
+  function seedCategory() {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM category",
+        [],
+        (tx, result) => {
+          console.log(result.rows._array);
+          if (result.rows.length === 0) {
+            for (const category of categorySeed) {
+              tx.executeSql("INSERT INTO category (name) VALUES (?)", [
+                category,
+              ]);
+            }
+          }
+        },
+        (tx, error) => {
+          console.log(error.message);
+        }
+      );
+    });
   }
 
   // seed database function
@@ -24,9 +53,15 @@ function HomeScreen({ route, navigation }) {
           console.log(result.rows.length);
           if (result.rows.length === 0) {
             for (const exercise of updatedExercises) {
+              let categoryId;
+              if (exercise.type === "Upper Body") categoryId = 1;
+              if (exercise.type === "Lower Body") categoryId = 2;
+              if (exercise.type === "Core") categoryId = 3;
+              if (exercise.type === "Full Body") categoryId = 4;
+
               tx.executeSql(
-                "INSERT INTO exercises (name, type, description) VALUES (?,?,?)",
-                [exercise.name, exercise.type, exercise.description]
+                "INSERT INTO exercises (name, category_id, description) VALUES (?,?,?)",
+                [exercise.name, categoryId, exercise.description]
               );
             }
           }
@@ -39,10 +74,12 @@ function HomeScreen({ route, navigation }) {
   }
 
   useEffect(() => {
+    // dropTables();
     // Create Tables
     createTable();
 
     // seeding data
+    seedCategory();
     seedExercises();
   }, []);
 

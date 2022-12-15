@@ -2,12 +2,12 @@ import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 
 const db = DatabaseConnection.getConnection();
 
-function dropTables() {
+export function dropTables() {
   db.transaction((tx) => {
-    // tx.executeSql("DROP TABLE rounds");
-    // tx.executeSql("DROP TABLE saved_workouts");
-    // tx.executeSql("DROP TABLE exercises");
-    // tx.executeSql("DROP TABLE workout_junction");
+    tx.executeSql("DROP TABLE category");
+    tx.executeSql("DROP TABLE saved_workouts");
+    tx.executeSql("DROP TABLE exercises");
+    tx.executeSql("DROP TABLE workout_junction");
   });
 }
 
@@ -22,9 +22,12 @@ export function createTable() {
 
     // tx.executeSql("DROP TABLE workout_junction");
     // tx.executeSql("DROP TABLE exercises");
-
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS exercises (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), type VARCHAR(255), description VARCHAR(255))",
+      "CREATE TABLE IF NOT EXISTS category (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255))",
+      []
+    );
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS exercises (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), description VARCHAR(255), category_id INTEGER REFERENCES category(id))",
       []
     );
     tx.executeSql(
