@@ -1,10 +1,10 @@
-export function GetExercises(arrayOfExercises, round) {
+export function GetExercises(arrayOfExercises, round, length) {
   let exercise;
   const randNum = Math.floor(Math.random() * arrayOfExercises.length);
   console.log(arrayOfExercises[0].id);
   exercise = {
     id: arrayOfExercises[randNum].id,
-    length: 20,
+    length: length,
     round: round,
     name: arrayOfExercises[randNum].name,
     description: arrayOfExercises[randNum].description,

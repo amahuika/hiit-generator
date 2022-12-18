@@ -63,10 +63,10 @@ function GenerateScreen({ route, navigation }) {
     let round = 1;
     for (let i = 0; i < exercisesToRetrieve; i++) {
       exercises.push(
-        GetExercises(UpperBody, round),
-        GetExercises(LowerBody, round),
-        GetExercises(Core, round),
-        GetExercises(FullBody, round)
+        GetExercises(UpperBody, round, 20),
+        GetExercises(LowerBody, round, 20),
+        GetExercises(Core, round, 20),
+        GetExercises(FullBody, round, 20)
       );
 
       round++;
