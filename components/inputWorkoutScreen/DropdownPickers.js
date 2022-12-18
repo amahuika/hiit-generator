@@ -10,7 +10,7 @@ function DropdownPickers({
   onSelectExercise,
 }) {
   return (
-    <View style={{ flexDirection: "row", backgroundColor: "#222831" }}>
+    <View style={[{ flexDirection: "row", backgroundColor: "#222831" }]}>
       <SelectDropdown
         data={categories}
         onSelect={(item, index) => {

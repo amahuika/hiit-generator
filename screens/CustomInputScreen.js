@@ -21,14 +21,18 @@ import DraggableFlatList, {
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
+import MyButton from "../components/MyButton";
+import EditButton from "../components/inputWorkoutScreen/EditButton";
 const db = DatabaseConnection.getConnection();
 
-function CustomInputScreen(props) {
+function CustomInputScreen({ route, navigation }) {
   const [categories, setCategories] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [exerciseList, setExerciseList] = useState([]);
   const [workoutOrder, setWorkoutOrder] = useState([]);
   const [totalWorkoutTime, setTotalWorkoutTime] = useState("00:00");
+  const [exercisesFromDb, setExercisesFromDb] = useState([]);
+  const [showDescription, setShowDescription] = useState(false);
 
   const [exercises, setExercises] = useState([
     { name: "No category selected" },
@@ -44,7 +48,7 @@ function CustomInputScreen(props) {
 
   useEffect(() => {
     console.log("useEffect");
-    generatesWorkout();
+
     if (categories.length === 0) {
       db.transaction((tx) => {
         tx.executeSql(
@@ -56,6 +60,20 @@ function CustomInputScreen(props) {
         );
       });
     }
+    generatesWorkout();
+    navigation.setOptions({
+      headerRight: () => {
+        if (workoutOrder.length > 0) {
+          return (
+            <Pressable style={{ marginEnd: 32 }} onPress={onSaveWorkout}>
+              <Ionicons name="star-outline" size={34} color="#00ADB5" />
+            </Pressable>
+          );
+        } else {
+          return null;
+        }
+      },
+    });
   }, [exerciseList, userInput]);
 
   function inputHandler(input) {
@@ -71,8 +89,11 @@ function CustomInputScreen(props) {
     // console.log(input);
   }
 
+  function onSaveWorkout() {
+    console.log("Saved");
+  }
   function onSelectCategory(categoryId) {
-    console.log(categoryId);
+    // console.log(categoryId);
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -81,7 +102,7 @@ function CustomInputScreen(props) {
         (tx, result) => {
           // console.log(result.rows._array);
 
-          const exercises = result.rows._array.map((item) => {
+          let exercisesFromDb = result.rows._array.map((item) => {
             return {
               name: item.name,
               id: item.id,
@@ -90,6 +111,13 @@ function CustomInputScreen(props) {
               isChecked: false,
             };
           });
+          setExercisesFromDb((val) => [...exercisesFromDb]);
+
+          const exercisesIds = exerciseList.map((val) => val.id);
+
+          let filtered = exercisesFromDb.filter(
+            (val) => !exercisesIds.includes(val.id)
+          );
 
           setExercises((val) => [
             {
@@ -98,7 +126,7 @@ function CustomInputScreen(props) {
               length: userInput.break,
               isChecked: false,
             },
-            ...exercises,
+            ...filtered,
           ]);
         }
       );
@@ -127,8 +155,21 @@ function CustomInputScreen(props) {
 
   function deleteChecked() {
     const updateList = exerciseList.filter((item) => item.isChecked === false);
-
     setExerciseList((val) => [...updateList]);
+
+    const exercisesIds = updateList.map((val) => val.id);
+    let filtered = exercisesFromDb.filter(
+      (val) => !exercisesIds.includes(val.id)
+    );
+    setExercises((val) => [
+      {
+        id: new Date().getTime(),
+        name: "Break",
+        length: userInput.break,
+        isChecked: false,
+      },
+      ...filtered,
+    ]);
   }
 
   function generatesWorkout() {
@@ -149,14 +190,14 @@ function CustomInputScreen(props) {
         return {
           name: item.name,
           id: item.id,
-          length: userInput.break,
+          length: parseInt(userInput.break),
         };
       } else {
         return {
           name: item.name,
           description: item.description,
           id: item.id,
-          length: userInput.length,
+          length: parseInt(userInput.length),
         };
       }
     });
@@ -166,7 +207,7 @@ function CustomInputScreen(props) {
         for (let i = 0; i < numOfSets; i++) {
           workoutOrderArray.push(exercise, {
             name: "Rest",
-            length: userInput.rest,
+            length: parseInt(userInput.rest),
           });
         }
       } else {
@@ -174,32 +215,73 @@ function CustomInputScreen(props) {
         workoutOrderArray.push({
           name: "Break",
           id: exercise.id,
-          length: userInput.break,
+          length: parseInt(userInput.break),
         });
       }
     }
-    if (
-      workoutOrderArray.length > 1 &&
-      workoutOrderArray[workoutOrderArray.length - 1].name === "Rest"
-    ) {
-      workoutOrderArray.pop();
-    }
+
     // repeat round
     let addRepeatRound = [];
     for (let i = 0; i < numOfRounds; i++) {
       addRepeatRound.push(...workoutOrderArray);
     }
     let count = 0;
-    addRepeatRound.map((item) => (count += parseInt(item.length)));
+    addRepeatRound.map((item) => (count += item.length));
+
+    // remove last element if break or rest
+    if (
+      (addRepeatRound.length > 1 &&
+        addRepeatRound[workoutOrderArray.length - 1].name === "Rest") ||
+      addRepeatRound[workoutOrderArray.length - 1].name === "Break"
+    ) {
+      addRepeatRound.pop();
+    }
 
     const totalTime = displayTimeRemaining(count);
+    console.log(totalTime);
     setTotalWorkoutTime(totalTime);
     setWorkoutOrder((val) => [...addRepeatRound]);
     // console.log(workoutOrder);
   }
 
+  function editHandler() {
+    isEdit ? setIsEdit(false) : setIsEdit(true);
+  }
+  function startHandler() {
+    if (workoutOrder.length === 0) return;
+
+    navigation.navigate("workout", {
+      workout: workoutOrder,
+      totalTime: totalWorkoutTime,
+      workoutName: userInput.name === "" ? null : userInput.name,
+    });
+    console.log("start");
+  }
+
+  function onShowDescription() {
+    console.log("show");
+  }
+
+  function RenderButtons() {
+    if (!isEdit && workoutOrder.length > 0) {
+      return (
+        <>
+          <EditButton onPress={editHandler} />
+          <MyButton
+            style={styles.button}
+            txtStyle={styles.btnText}
+            text="Start"
+            onPress={startHandler}
+          />
+        </>
+      );
+    } else if (!isEdit && exerciseList.length > 0) {
+      return <EditButton onPress={editHandler} />;
+    }
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={isEdit ? styles.editContainer : styles.container}>
       {!isEdit && (
         <CustomForm
           inputHandler={inputHandler}
@@ -207,23 +289,19 @@ function CustomInputScreen(props) {
           userInput={userInput}
         />
       )}
-      {/* <ScrollView>
-        {workoutOrder.map((item) => (
-          <Card>
-            <Text>{item.name}</Text>
-            <Text>{item.length} sec</Text>
-          </Card>
-        ))}
-      </ScrollView> */}
-      <DropdownPickers
-        categories={categories}
-        exercises={exercises}
-        onSelectCat={onSelectCategory}
-        onSelectExercise={onSelectExercise}
-      />
-      <View style={{ flex: 1 }}>
+
+      <View style={isEdit && { paddingHorizontal: 8 }}>
+        <DropdownPickers
+          categories={categories}
+          exercises={exercises}
+          onSelectCat={onSelectCategory}
+          onSelectExercise={onSelectExercise}
+        />
+      </View>
+
+      <View style={[{ flex: 1 }, isEdit && { paddingHorizontal: 8 }]}>
         <DraggableFlatList
-          contentContainerStyle={{ paddingBottom: 50 }}
+          contentContainerStyle={{ paddingBottom: 150 }}
           scrollEnabled={true}
           data={exerciseList}
           onDragEnd={({ data }) => setExerciseList(data)}
@@ -278,6 +356,14 @@ function CustomInputScreen(props) {
                         </View>
                       </View>
                     </View>
+                    {!isEdit && (
+                      <Pressable
+                        onPressIn={onShowDescription}
+                        disabled={isActive}
+                      >
+                        <Ionicons name="chevron-down" size={24} color="black" />
+                      </Pressable>
+                    )}
 
                     {isEdit && (
                       <Pressable onPressIn={drag} disabled={isActive}>
@@ -296,28 +382,21 @@ function CustomInputScreen(props) {
         />
       </View>
 
-      {!isEdit && (
-        <Pressable
-          android_ripple={{ color: "#EEEEEE", foreground: true }}
-          style={styles.editButton}
-          onPress={() => setIsEdit(true)}
-        >
-          <Ionicons name="create-outline" size={36} color="white" />
-        </Pressable>
-      )}
+      <RenderButtons />
+
       {isEdit && (
         <View
           style={{
             backgroundColor: "#393E46",
             padding: 12,
             flexDirection: "row",
-            justifyContent: "flex-end",
+            justifyContent: "space-around",
           }}
         >
           <Pressable style={{ marginEnd: 32 }} onPress={deleteChecked}>
             <Ionicons name="trash-outline" size={36} color="#fe7a7a" />
           </Pressable>
-          <Pressable onPress={() => setIsEdit(false)}>
+          <Pressable onPress={editHandler}>
             <Ionicons name="close" size={36} color="#EEEEEE" />
           </Pressable>
         </View>
@@ -330,7 +409,12 @@ export default CustomInputScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
+    padding: 8,
+    backgroundColor: "#222831",
+  },
+  editContainer: {
+    flex: 1,
+    paddingTop: 8,
     backgroundColor: "#222831",
   },
   breakContainer: {
@@ -339,16 +423,19 @@ const styles = StyleSheet.create({
   breakText: {
     color: "#EEEEEE",
   },
-  editButton: {
+
+  button: {
     position: "absolute",
-    bottom: 16,
-    right: 16,
-    backgroundColor: "#00ADB5",
-    borderRadius: 100,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    overflow: "hidden",
+    backgroundColor: "#393E46",
+    // backgroundColor: "#00ADB5",
+    bottom: 8,
+    left: 8,
+    marginBottom: 5,
+    borderRadius: 50,
+  },
+  btnText: {
+    color: "#00ADB5",
+    // color: "#EEEEEE",
+    fontSize: 24,
   },
 });

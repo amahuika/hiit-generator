@@ -90,8 +90,12 @@ function WorkoutScreen({ route, navigation }) {
 
       setTotalTimeInSeconds(totalTimeInSeconds);
       setTotalTime(displayTimeRemaining(totalTimeInSeconds));
-
-      const myWorkout = [...workout];
+      let myWorkout = [];
+      if (workout[0].name !== "Get Ready") {
+        myWorkout = [{ name: "Get Ready", length: 5 }, ...workout];
+      } else {
+        myWorkout = [...workout];
+      }
       setCurrentExercise(myWorkout[0]);
       setTimer(myWorkout[0].length);
 
