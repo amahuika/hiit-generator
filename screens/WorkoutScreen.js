@@ -20,7 +20,7 @@ function WorkoutScreen({ route, navigation }) {
   const [workoutList, setWorkoutList] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(5);
   const [hasPaused, setHasPaused] = useState(false);
   const [totalTime, setTotalTime] = useState();
   const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
@@ -35,8 +35,10 @@ function WorkoutScreen({ route, navigation }) {
     explosion.current.start();
   }
   const workout = route.params.workout;
-  const totalTimeInMinutes = route.params.totalTime;
+  const workoutInfo = route.params.workoutInfo;
   const workoutName = route.params.workoutName;
+  const workoutListForDb = route.params.workoutListForDb;
+  const workoutTotalTime = route.params.workoutTotalTime;
 
   // 20sec * 3
   // 10sec rest
@@ -109,6 +111,7 @@ function WorkoutScreen({ route, navigation }) {
     };
   }, [timer, hasPaused, hasStarted]);
 
+  console.log("time " + workoutTotalTime);
   function onPause() {
     hasPaused ? setHasPaused(false) : setHasPaused(true);
   }
@@ -177,7 +180,12 @@ function WorkoutScreen({ route, navigation }) {
       )}
 
       {isFinished && (
-        <DisplayFinish totalTime={totalTimeInMinutes} exercises={workout} />
+        <DisplayFinish
+          workoutInfo={workoutInfo}
+          exercises={workout}
+          workoutListForDb={workoutListForDb}
+          workoutTotalTime={workoutTotalTime}
+        />
       )}
 
       {workoutList.length !== 0 && (

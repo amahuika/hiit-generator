@@ -54,6 +54,7 @@ function HomeScreen({ route, navigation }) {
           if (result.rows.length === 0) {
             for (const exercise of updatedExercises) {
               let categoryId;
+              if (exercise.type === null) categoryId = null;
               if (exercise.type === "Upper Body") categoryId = 1;
               if (exercise.type === "Lower Body") categoryId = 2;
               if (exercise.type === "Core") categoryId = 3;
@@ -76,9 +77,11 @@ function HomeScreen({ route, navigation }) {
   useEffect(() => {
     // dropTables();
     // Create Tables
+
     createTable();
 
     // seeding data
+
     seedCategory();
     seedExercises();
   }, []);

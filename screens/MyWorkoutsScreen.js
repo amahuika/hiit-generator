@@ -18,6 +18,7 @@ function MyWorkoutsScreen({ route, navigation }) {
       tx.executeSql("SELECT * FROM saved_workouts", [], (tx, results) => {
         if (results.rows.length !== myWorkoutList.length) {
           setMyWorkoutList((val) => [...results.rows._array]);
+          console.log(results.rows._array);
         }
       });
     });
@@ -73,7 +74,9 @@ function MyWorkoutsScreen({ route, navigation }) {
             >
               <View>
                 <Text style={styles.workoutTitle}>{item.name}</Text>
-                <Text style={styles.totalTime}>Length: {item.length} mins</Text>
+                <Text style={styles.totalTime}>
+                  Length: {item.total_time} mins
+                </Text>
               </View>
               <Pressable
                 style={styles.deleteButton}

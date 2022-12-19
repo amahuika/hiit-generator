@@ -8,7 +8,7 @@ function EditButton({ onPress }) {
       style={styles.editButton}
       onPress={() => onPress()}
     >
-      <Ionicons name="create-outline" size={36} color="white" />
+      <Ionicons name="create-outline" size={28} color="white" />
     </Pressable>
   );
 }
@@ -26,9 +26,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 4,
     overflow: "hidden",
-    height: 60,
-    width: 60,
-    borderColor: "#EEEEEE",
-    borderWidth: 0.6,
+    height: 50,
+    width: 50,
   },
 });

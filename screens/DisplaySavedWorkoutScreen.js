@@ -4,7 +4,12 @@ import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import Card from "../components/Card";
 import ExerciseContainer from "../components/ExerciseContainer";
 import MyButton from "../components/MyButton";
-import { AddBreaks, GetWorkoutOrder } from "../HelperFunctions/HelperFunctions";
+import {
+  AddBreaks,
+  displayTimeRemaining,
+  generateCustomWorkout,
+  GetWorkoutOrder,
+} from "../HelperFunctions/HelperFunctions";
 
 const db = DatabaseConnection.getConnection();
 
@@ -12,96 +17,82 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
   const [workoutList, setWorkoutList] = useState([]);
   const [workoutOrder, setWorkoutOrder] = useState([]);
   const [totalTime, setTotalTime] = useState("");
-  const workout = route.params.workout;
+  const [breakId, setBreakId] = useState();
+
+  const workoutDetails = route.params.workout;
 
   useEffect(() => {
-    navigation.setOptions({ title: workout.name });
+    navigation.setOptions({ title: workoutDetails.name });
 
     if (workoutList.length === 0) {
       db.transaction((tx) => {
-        tx.executeSql("SELECT * FROM workout_junction", [], (tx, results) => {
-          console.log(results.rows._array);
-        });
-
         tx.executeSql(
-          `SELECT exercises.id, exercises.name, exercises.description, category.name AS type
-       FROM exercises INNER JOIN 
-       workout_junction ON exercises.id = workout_junction.exercise_id INNER JOIN
-       category ON exercises.category_id = category.id INNER JOIN
-       saved_workouts ON workout_junction.workout_id = saved_workouts.id
-       WHERE (saved_workouts.id = ?)`,
-          [workout.id],
+          "SELECT * FROM workout_junction WHERE workout_id = ?",
+          [workoutDetails.id],
           (tx, results) => {
-            console.log("Query " + results.rows._array);
-            if (results.rows.length > 0) {
-              let workouts = results.rows._array.map((item) => {
-                return {
-                  id: item.id,
-                  name: item.name,
-                  description: item.description,
-                  type: item.type,
-                  round: item.round,
-                  length: 20,
-                };
-              });
-              let addedBreaks = [];
-              if (workouts.length > 4) {
-                addedBreaks.push(workouts[0]);
-                for (let i = 1; i < workouts.length; i++) {
-                  if (i % 4 === 0) {
-                    addedBreaks.push({
-                      id: Math.random() * i,
-                      length: 45,
-                      round: workouts[i].round,
-                      name: "Break",
-                    });
+            for (const item of results.rows._array) {
+              tx.executeSql(
+                "SELECT * FROM exercises WHERE id = ?",
+                [item.exercise_id],
+                (tx, results) => {
+                  const resultObj = results.rows._array[0];
+                  if (resultObj.name === "Break") {
+                    setBreakId(resultObj.id);
+                    resultObj.id = new Date().getTime();
+                    resultObj.length = workoutDetails.break;
+                  } else {
+                    resultObj.length = workoutDetails.length;
+                    resultObj.sets = workoutDetails.sets;
                   }
-                  addedBreaks.push(workouts[i]);
+
+                  setWorkoutList((val) => [...val, resultObj]);
                 }
-              } else {
-                addedBreaks = workouts;
-              }
-              setWorkoutList((_) => [...addedBreaks]);
+              );
             }
-          },
-          (tx, error) => {
-            console.log(error.message);
-            console.log(error.code);
+            // setWorkoutList((val) => [...val, item]);
           }
         );
       });
     }
 
-    if (workoutOrder.length === 0 && workoutList.length > 0) {
-      const minutes = parseInt(workout.length.split(":")[0]);
-      // console.log("list length " + workoutList.length);
-      let workoutListUpdate = workoutList.filter(
-        (item) => item.name !== "Break"
+    if (workoutList.length > 0) {
+      const getWorkoutOrder = generateCustomWorkout(
+        workoutDetails,
+        workoutList,
+        breakId
       );
-      let getWorkout = GetWorkoutOrder(workoutListUpdate, minutes);
-
-      AddBreaks(getWorkout);
-
-      setTotalTime(workout.length);
-      setWorkoutOrder((_) => [...getWorkout]);
+      // console.log("Workout Order " + getWorkoutOrder.map((item) => item.name));
+      setWorkoutOrder((_) => [...getWorkoutOrder]);
+      let count = 0;
+      getWorkoutOrder.map((item) => (count += item.length));
+      const totalTime = displayTimeRemaining(count);
+      setTotalTime(totalTime);
     }
-  }, [workoutList, workoutOrder]);
+  }, [workoutList]);
 
   function startHandler() {
     // console.log("Start");
+
     console.log(workoutOrder);
     // console.log(workoutList.length);
     navigation.navigate("workout", {
       workout: workoutOrder,
-      totalTime: totalTime,
-      workoutName: workout.name,
+      workoutName: workoutDetails.name,
+      workoutInfo: workoutDetails,
+      workoutListForDb: null,
+      workoutTotalTime: totalTime,
     });
   }
 
   return (
     <View style={styles.container}>
       <Card>
-        <Text>Total Time: {workout.length}</Text>
+        <Text>Sets {workoutDetails.sets}</Text>
+
+        <Text>Length of exercise: {workoutDetails.length} sec</Text>
+
+        <Text>Rest between exercises: {workoutDetails.rest} sec</Text>
+        <Text>Total Time: {totalTime}</Text>
       </Card>
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         <ExerciseContainer workoutList={workoutList} fromSaved={true} />

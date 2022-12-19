@@ -1,3 +1,8 @@
+// import { DBCoreRangeType } from "dexie";
+import { DatabaseConnection } from "../assets/database/DatabaseConnection";
+
+const db = DatabaseConnection.getConnection();
+
 export function GetExercises(arrayOfExercises, round, length) {
   let exercise;
   const randNum = Math.floor(Math.random() * arrayOfExercises.length);
@@ -93,3 +98,75 @@ export function displayTimeRemaining(totalSeconds) {
     .toString()
     .padStart(2, 0)}`;
 }
+
+export function generateCustomWorkout(userInput, exerciseList, breakId) {
+  if (userInput.length === "" || userInput.break === "") {
+    return;
+  }
+
+  const numOfSets = parseInt(userInput.sets);
+  const numOfRounds = parseInt(userInput.rounds);
+  const breakLength = userInput.break === "" ? 0 : parseInt(userInput.break);
+  const restLength = userInput.rest === "" ? 0 : parseInt(userInput.rest);
+  const exerciseLength = parseInt(userInput.length);
+  console.log(exerciseList.length);
+
+  let workoutOrderArray = [];
+  const exercisesArray = exerciseList;
+  const updatedArray = exercisesArray.map((item) => {
+    if (item.name === "Break") {
+      return {
+        name: item.name,
+        id: breakId,
+        length: breakLength,
+      };
+    } else {
+      return {
+        name: item.name,
+        description: item.description,
+        id: item.id,
+        length: exerciseLength,
+      };
+    }
+  });
+
+  for (const exercise of updatedArray) {
+    if (exercise.name !== "Break") {
+      for (let i = 0; i < numOfSets; i++) {
+        workoutOrderArray.push(exercise, {
+          name: "Rest",
+          length: restLength,
+        });
+      }
+    } else {
+      workoutOrderArray.pop();
+      workoutOrderArray.push({
+        name: "Break",
+        id: breakId,
+        length: breakLength,
+      });
+    }
+  }
+
+  // repeat rounds based on user input
+  let addRepeatRound = [];
+  for (let i = 0; i < numOfRounds; i++) {
+    addRepeatRound.push(...workoutOrderArray);
+  }
+
+  // remove last element if break or rest
+  if (addRepeatRound.length > 1 && workoutOrderArray.length > 0) {
+    if (
+      addRepeatRound[workoutOrderArray.length - 1].name === "Rest" ||
+      addRepeatRound[workoutOrderArray.length - 1].name === "Break"
+    ) {
+      addRepeatRound.pop();
+    }
+  }
+  return addRepeatRound;
+}
+
+// let count = 0;
+// addRepeatRound.map((item) => (count += item.length));
+// const totalTime = displayTimeRemaining(count);
+// setTotalWorkoutTime(totalTime);

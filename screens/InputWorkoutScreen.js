@@ -21,44 +21,7 @@ const db = DatabaseConnection.getConnection();
 function InputWorkoutScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(20);
   const [validInput, setValidInput] = useState(true);
-  const [isRandom, setIsRandom] = useState(false);
-  const [isCustom, setIsCustom] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [dummyData, setDummyData] = useState([
-    { label: 1, key: 1 },
-    { label: 2, key: 2 },
-    { label: 3, key: 3 },
-    { label: 4, key: 4 },
-    { label: 5, key: 5 },
-    { label: 6, key: 6 },
-  ]);
-
-  const [dropItems, setDropItems] = useState([
-    {
-      label: "Upper Body",
-      value: "Upper Body",
-      selectable: false,
-    },
-    {
-      label: "Lower Body",
-      value: "Lower Body",
-      selectable: false,
-    },
-    {
-      label: "Full Body",
-      value: "Full Body",
-      selectable: false,
-    },
-    {
-      label: "Core",
-      value: "Core",
-      selectable: false,
-    },
-  ]);
-
   const [allData, setAllData] = useState([]);
-  const [order, setOrder] = useState([]);
 
   useEffect(() => {
     if (allData.length === 0) {
@@ -72,17 +35,6 @@ function InputWorkoutScreen({ route, navigation }) {
             const resultsData = results.rows._array;
             console.log(resultsData);
             setAllData((val) => [...resultsData]);
-
-            const setItems = resultsData.map((item) => {
-              return {
-                id: item.id,
-                label: item.name,
-                value: item.name,
-                parent: item.type,
-              };
-            });
-            console.log(setItems.length);
-            setDropItems((prev) => [...prev, ...setItems]);
           },
           (tx, error) => {
             console.log(error.message);
@@ -98,26 +50,6 @@ function InputWorkoutScreen({ route, navigation }) {
       return;
     }
     navigation.navigate("generator", { minutes: minutes, allData: allData });
-  }
-
-  function onRandomHandle() {
-    isRandom ? setIsRandom(false) : setIsRandom(true);
-  }
-
-  function onCustomHandle() {
-    isCustom ? setIsCustom(false) : setIsCustom(true);
-  }
-
-  function renderItem({ item, drag, isActive }) {
-    return (
-      <ScaleDecorator>
-        <TouchableOpacity onPressIn={drag} disabled={isActive}>
-          <Card>
-            <Text style={{ color: "#1a1515" }}>{item.name}</Text>
-          </Card>
-        </TouchableOpacity>
-      </ScaleDecorator>
-    );
   }
 
   return (
@@ -141,56 +73,6 @@ function InputWorkoutScreen({ route, navigation }) {
             onPress={generateHandler}
           />
         </>
-
-        {/* <View>
-          <Text style={styles.label}>Select Exercises</Text>
-          <DropDownPicker
-            open={dropdownOpen}
-            value={value}
-            items={dropItems}
-            setOpen={setDropdownOpen}
-            setItems={setDropItems}
-            setValue={setValue}
-            theme="LIGHT"
-            // multiple={true}
-            mode="BADGE"
-            maxHeight={500}
-            badgeDotColors={["#00ADB5"]}
-            onSelectItem={(item) => {
-              console.log(item.value);
-              setOrder((prev) => [...prev, { id: item.id, name: item.value }]);
-            }}
-          />
-        </View> */}
-        {/* <DraggableFlatList
-          data={order}
-          onDragEnd={({ data }) => setOrder(data)}
-          keyExtractor={(item, index) => item.id}
-          renderItem={renderItem}
-        /> */}
-
-        {/* {!isRandom && (
-          <MyButton
-            style={styles.GenerateButton}
-            txtStyle={styles.btnText}
-            text="Random Workout"
-            onPress={() => {
-              setIsCustom(false);
-              onRandomHandle();
-            }}
-          />
-        )}
-        {!isCustom && (
-          <MyButton
-            style={styles.GenerateButton}
-            txtStyle={styles.btnText}
-            text="Custom Workout"
-            onPress={() => {
-              setIsRandom(false);
-              onCustomHandle();
-            }}
-          />
-        )} */}
       </View>
     </View>
   );

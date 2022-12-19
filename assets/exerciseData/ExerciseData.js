@@ -363,4 +363,10 @@ export const updatedExercises = [
     name: "One-Arm Push-Up",
     type: "Upper Body",
   },
+  {
+    description: "",
+    id: "b1",
+    name: "Break",
+    type: null,
+  },
 ];

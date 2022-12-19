@@ -33,7 +33,9 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
             marginTop: 4,
           }}
         >
-          <Text style={styles.myTextLength}>20sec x3</Text>
+          <Text style={styles.myTextLength}>
+            {exercise.length}sec x{exercise.sets}
+          </Text>
 
           <Pressable
             onPress={showDescriptionHandle}

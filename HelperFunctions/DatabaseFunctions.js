@@ -31,11 +31,11 @@ export function createTable() {
       []
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS saved_workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), length VARCHAR(255), rest INTEGER, break INTEGER)",
+      "CREATE TABLE IF NOT EXISTS saved_workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), length INTEGER, rest INTEGER, break INTEGER, sets INTEGER, rounds INTEGER, total_time VARCHAR(255))",
       []
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS workout_junction (id INTEGER PRIMARY KEY AUTOINCREMENT, round INTEGER, workout_id INTEGER REFERENCES saved_workouts(id), exercise_id INTEGER REFERENCES exercises(id))",
+      "CREATE TABLE IF NOT EXISTS workout_junction (id INTEGER PRIMARY KEY AUTOINCREMENT, workout_id INTEGER REFERENCES saved_workouts(id), exercise_id INTEGER REFERENCES exercises(id))",
       []
     );
   });

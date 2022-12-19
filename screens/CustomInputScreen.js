@@ -20,7 +20,10 @@ import DropdownPickers from "../components/inputWorkoutScreen/DropdownPickers";
 import DraggableFlatList, {
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
-import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
+import {
+  displayTimeRemaining,
+  generateCustomWorkout,
+} from "../HelperFunctions/HelperFunctions";
 import MyButton from "../components/MyButton";
 import EditButton from "../components/inputWorkoutScreen/EditButton";
 const db = DatabaseConnection.getConnection();
@@ -32,6 +35,8 @@ function CustomInputScreen({ route, navigation }) {
   const [workoutOrder, setWorkoutOrder] = useState([]);
   const [totalWorkoutTime, setTotalWorkoutTime] = useState("00:00");
   const [exercisesFromDb, setExercisesFromDb] = useState([]);
+  const [breakId, setBreakId] = useState(null);
+
   const [showDescription, setShowDescription] = useState(false);
 
   const [exercises, setExercises] = useState([
@@ -47,8 +52,21 @@ function CustomInputScreen({ route, navigation }) {
   });
 
   useEffect(() => {
-    console.log("useEffect");
-
+    // get the break id from db
+    if (breakId === null) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE name = ?",
+          ["Break"],
+          (tx, results) => {
+            results.rows._array.length !== 0
+              ? setBreakId((val) => results.rows._array[0].id)
+              : setBreakId(null);
+          }
+        );
+      });
+    }
+    // get the categories
     if (categories.length === 0) {
       db.transaction((tx) => {
         tx.executeSql(
@@ -60,7 +78,10 @@ function CustomInputScreen({ route, navigation }) {
         );
       });
     }
+    // generate a workout order
     generatesWorkout();
+
+    // header options
     navigation.setOptions({
       headerRight: () => {
         if (workoutOrder.length > 0) {
@@ -76,6 +97,9 @@ function CustomInputScreen({ route, navigation }) {
     });
   }, [exerciseList, userInput]);
 
+  console.log(exerciseList.map((val) => val.id));
+
+  // handle form input
   function inputHandler(input) {
     setUserInput({
       name: input.name,
@@ -89,9 +113,12 @@ function CustomInputScreen({ route, navigation }) {
     // console.log(input);
   }
 
+  // save workout to DB function
   function onSaveWorkout() {
     console.log("Saved");
   }
+
+  // select category populate exercise list based on selected category
   function onSelectCategory(categoryId) {
     // console.log(categoryId);
 
@@ -100,8 +127,6 @@ function CustomInputScreen({ route, navigation }) {
         "SELECT * FROM exercises WHERE category_id = ?",
         [categoryId],
         (tx, result) => {
-          // console.log(result.rows._array);
-
           let exercisesFromDb = result.rows._array.map((item) => {
             return {
               name: item.name,
@@ -133,8 +158,9 @@ function CustomInputScreen({ route, navigation }) {
     });
   }
 
+  // add exercise too list to be displayed on selected exercise
   function onSelectExercise(exercise) {
-    console.log(exercise.id);
+    // console.log(exercise.id);
     if (exercise.id === undefined) return;
 
     const exercisesUpdated = exercises.filter(
@@ -153,6 +179,7 @@ function CustomInputScreen({ route, navigation }) {
     setExerciseList((prev) => [...prev, exercise]);
   }
 
+  // delete all checked exercises
   function deleteChecked() {
     const updateList = exerciseList.filter((item) => item.isChecked === false);
     setExerciseList((val) => [...updateList]);
@@ -172,90 +199,44 @@ function CustomInputScreen({ route, navigation }) {
     ]);
   }
 
+  // generate the workout order based on user input
   function generatesWorkout() {
-    if (
-      userInput.length === "" ||
-      userInput.break === "" ||
-      userInput.rest === ""
-    ) {
+    if (userInput.length === "" || userInput.break === "") {
       return;
     }
-    const numOfSets = parseInt(userInput.sets);
-    const numOfRounds = parseInt(userInput.rounds);
 
-    let workoutOrderArray = [];
-    const exercisesArray = exerciseList;
-    const updatedArray = exercisesArray.map((item) => {
-      if (item.name === "Break") {
-        return {
-          name: item.name,
-          id: item.id,
-          length: parseInt(userInput.break),
-        };
-      } else {
-        return {
-          name: item.name,
-          description: item.description,
-          id: item.id,
-          length: parseInt(userInput.length),
-        };
-      }
-    });
+    const getWorkoutOrder = generateCustomWorkout(
+      userInput,
+      exerciseList,
+      breakId
+    );
 
-    for (const exercise of updatedArray) {
-      if (exercise.name !== "Break") {
-        for (let i = 0; i < numOfSets; i++) {
-          workoutOrderArray.push(exercise, {
-            name: "Rest",
-            length: parseInt(userInput.rest),
-          });
-        }
-      } else {
-        workoutOrderArray.pop();
-        workoutOrderArray.push({
-          name: "Break",
-          id: exercise.id,
-          length: parseInt(userInput.break),
-        });
-      }
-    }
-
-    // repeat round
-    let addRepeatRound = [];
-    for (let i = 0; i < numOfRounds; i++) {
-      addRepeatRound.push(...workoutOrderArray);
-    }
     let count = 0;
-    addRepeatRound.map((item) => (count += item.length));
-
-    // remove last element if break or rest
-    if (
-      (addRepeatRound.length > 1 &&
-        addRepeatRound[workoutOrderArray.length - 1].name === "Rest") ||
-      addRepeatRound[workoutOrderArray.length - 1].name === "Break"
-    ) {
-      addRepeatRound.pop();
-    }
-
+    getWorkoutOrder.map((item) => (count += item.length));
     const totalTime = displayTimeRemaining(count);
-    console.log(totalTime);
+
     setTotalWorkoutTime(totalTime);
-    setWorkoutOrder((val) => [...addRepeatRound]);
+    setWorkoutOrder((val) => [...getWorkoutOrder]);
     // console.log(workoutOrder);
   }
 
+  // toggle edit mode
   function editHandler() {
     isEdit ? setIsEdit(false) : setIsEdit(true);
   }
+
+  // start the workout
   function startHandler() {
     if (workoutOrder.length === 0) return;
 
     navigation.navigate("workout", {
       workout: workoutOrder,
-      totalTime: totalWorkoutTime,
+      workoutInfo: userInput,
       workoutName: userInput.name === "" ? null : userInput.name,
+      workoutListForDb: exerciseList,
+      workoutTotalTime: totalWorkoutTime,
     });
-    console.log("start");
+    // console.log("start");
   }
 
   function onShowDescription() {
