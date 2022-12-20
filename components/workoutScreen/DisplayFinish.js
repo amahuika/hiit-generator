@@ -4,6 +4,7 @@ import MyButton from "../MyButton";
 import { DatabaseConnection } from "../../assets/database/DatabaseConnection";
 import { useState } from "react";
 import SaveWorkoutModal from "./SaveWorkoutModal";
+import { useToast } from "react-native-toast-notifications";
 
 const db = DatabaseConnection.getConnection();
 
@@ -17,11 +18,13 @@ function DisplayFinish({
   const [isSaved, setIsSaved] = useState(false);
   const navigation = useNavigation();
 
+  const toast = useToast();
+
   // create a list to be saved to db if it is not null
   exercises.shift();
   let updatedList;
   const getBreakId = exercises.find((item) => item.name === "Break");
-  // console.log(exercises.map((e) => e.id));
+  console.log(exercises.map((e) => e.id));
   if (workoutListForDb !== null) {
     updatedList = workoutListForDb.map((item) => {
       if (item.name === "Break" && getBreakId.id !== undefined) {
@@ -84,9 +87,16 @@ function DisplayFinish({
       }
     });
 
-    modalHandler();
-
+    if (workoutInfo.name === "") {
+      modalHandler();
+    }
     setIsSaved(true);
+    toast.show("Workout saved successfully!", {
+      type: "normal",
+      placement: "bottom",
+      animationType: "slide-in",
+      duration: 3000,
+    });
   }
 
   function backHandler() {
@@ -102,7 +112,7 @@ function DisplayFinish({
       />
       <View style={styles.innerContainer}>
         <Text style={styles.congratulationText}>Congratulations!</Text>
-        <Text style={styles.mainText}>Total time:</Text>
+        <Text style={styles.mainText}>Total time: {workoutTotalTime}</Text>
 
         <Text style={styles.amazingText}>You are amazing!</Text>
       </View>
@@ -113,7 +123,13 @@ function DisplayFinish({
             text={!isSaved ? "Save Workout" : "Workout Saved!"}
             txtStyle={styles.buttonText}
             onPress={() => {
-              if (!isSaved) modalHandler();
+              if (!isSaved) {
+                if (workoutInfo.name !== "") {
+                  saveWorkoutHandler(workoutInfo.name);
+                } else {
+                  modalHandler();
+                }
+              }
             }}
           />
         )}

@@ -136,12 +136,6 @@ function GenerateScreen({ route, navigation }) {
       workoutInfo: workoutInfo,
       workoutListForDb: exerciseList,
     });
-
-    // const workout = route.params.workout;
-    // const workoutInfo = route.params.workoutInfo;
-    // const workoutName = route.params.workoutName;
-    // const workoutListForDb = route.params.workoutListForDb;
-    // const workoutTotalTime = route.params.workoutTotalTime;
   }
 
   function onRefreshExercise(exercise, index) {
@@ -165,7 +159,6 @@ function GenerateScreen({ route, navigation }) {
         <Text>Exercise: 20 sec x3</Text>
         <Text>Rest: 10 sec</Text>
         <Text>Break: 45 sec</Text>
-        <Text>sequence is continued until timer is finished</Text>
         <Text>Total Time: {totalTime}</Text>
       </Card>
       <ScrollView

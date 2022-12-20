@@ -97,7 +97,7 @@ export function displayTimeRemaining(totalSeconds) {
 }
 
 export function generateCustomWorkout(userInput, exerciseList, breakId) {
-  if (userInput.length === "" || userInput.break === "") {
+  if (userInput.length === "" || exerciseList.length === 0) {
     return;
   }
   const numOfSets = parseInt(userInput.sets);
@@ -105,7 +105,7 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
   const breakLength = userInput.break === "" ? 0 : parseInt(userInput.break);
   const restLength = userInput.rest === "" ? 0 : parseInt(userInput.rest);
   const exerciseLength = parseInt(userInput.length);
-  const breakObj = { name: "Break", id: breakId, length: userInput.break };
+  const breakObj = { name: "Break", id: breakId, length: breakLength };
 
   let workoutOrderArray = [];
   const exercisesArray = exerciseList;
@@ -136,29 +136,46 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
     }
   }
 
+  if (restLength === 0)
+    workoutOrderArray = workoutOrderArray.filter((i) => i.name !== "Rest");
+  console.log(workoutOrderArray.map((e) => e.name));
   // repeat rounds based on user input
-  const lastIndex = workoutOrderArray.length - 1;
   // remove last element if break or rest
-  if (workoutOrderArray.length > 1) {
-    if (
-      workoutOrderArray[lastIndex].name === "Rest" ||
-      workoutOrderArray[lastIndex].name === "Break"
-    ) {
-      workoutOrderArray.pop();
-    }
-  }
+
+  const updateWorkoutOrder =
+    workoutOrderArray.length >= 2
+      ? checkLastForBreakOrRest(workoutOrderArray)
+      : workoutOrderArray;
 
   let addRepeatRound = [];
-  if (numOfRounds > 1) workoutOrderArray.push(breakObj);
+  if (numOfRounds > 1) updateWorkoutOrder.push(breakObj);
 
-  console.log(workoutOrderArray.map((e) => e.name));
+  console.log(updateWorkoutOrder.map((e) => e.name));
 
   for (let i = 0; i < numOfRounds; i++) {
-    addRepeatRound.push(...workoutOrderArray);
+    addRepeatRound.push(...updateWorkoutOrder);
   }
-  return addRepeatRound;
+  const finalUpdatedWorkoutOrder =
+    addRepeatRound.length >= 2
+      ? checkLastForBreakOrRest(addRepeatRound)
+      : addRepeatRound;
+
+  return finalUpdatedWorkoutOrder;
 }
 
+function checkLastForBreakOrRest(arr) {
+  const arrClone = arr;
+  const lastIndex = arrClone.length - 1;
+
+  if (
+    arrClone[lastIndex].name === "Break" ||
+    arrClone[lastIndex].name === "Rest"
+  ) {
+    arrClone.pop();
+  }
+
+  return arrClone;
+}
 // let count = 0;
 // addRepeatRound.map((item) => (count += item.length));
 // const totalTime = displayTimeRemaining(count);

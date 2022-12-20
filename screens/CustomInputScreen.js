@@ -79,7 +79,9 @@ function CustomInputScreen({ route, navigation }) {
       });
     }
     // generate a workout order
-    generatesWorkout();
+    if (exerciseList.length > 0) {
+      generatesWorkout();
+    }
 
     // header options
     navigation.setOptions({
@@ -148,7 +150,7 @@ function CustomInputScreen({ route, navigation }) {
             {
               id: new Date().getTime(),
               name: "Break",
-              length: userInput.break,
+              length: parseInt(userInput.break),
               isChecked: false,
             },
             ...filtered,
@@ -201,7 +203,7 @@ function CustomInputScreen({ route, navigation }) {
 
   // generate the workout order based on user input
   function generatesWorkout() {
-    if (userInput.length === "" || userInput.break === "") {
+    if (userInput.length === "") {
       return;
     }
 
@@ -214,7 +216,7 @@ function CustomInputScreen({ route, navigation }) {
     let count = 0;
     getWorkoutOrder.map((item) => (count += item.length));
     const totalTime = displayTimeRemaining(count);
-
+    console.log(getWorkoutOrder.map((e) => e.length));
     setTotalWorkoutTime(totalTime);
     setWorkoutOrder((val) => [...getWorkoutOrder]);
     // console.log(workoutOrder);

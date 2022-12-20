@@ -91,7 +91,6 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
     // console.log(exerciseList.map((e) => e.id));
 
     let workoutOrder;
-
     const exercises = workoutList.filter((item) => item.name !== "Break");
     workoutOrder = GetWorkoutOrder(exercises, minutes);
 
