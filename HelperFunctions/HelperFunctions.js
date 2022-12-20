@@ -1,12 +1,9 @@
 // import { DBCoreRangeType } from "dexie";
-import { DatabaseConnection } from "../assets/database/DatabaseConnection";
-
-const db = DatabaseConnection.getConnection();
 
 export function GetExercises(arrayOfExercises, round, length) {
   let exercise;
   const randNum = Math.floor(Math.random() * arrayOfExercises.length);
-  console.log(arrayOfExercises[0].id);
+
   exercise = {
     id: arrayOfExercises[randNum].id,
     length: length,
@@ -60,7 +57,7 @@ export function GetWorkoutOrder(exercisesArr, requiredMinutes) {
   return exerciseOrder;
 }
 
-export function AddBreaks(workoutList) {
+export function AddBreaks(workoutList, breakId) {
   const length = workoutList.length;
   let count = 1;
 
@@ -71,8 +68,8 @@ export function AddBreaks(workoutList) {
         name: "Break",
         length: 45,
         round: round,
+        id: breakId,
       };
-      // console.log("24th");
     }
     count++;
   }
@@ -103,23 +100,18 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
   if (userInput.length === "" || userInput.break === "") {
     return;
   }
-
   const numOfSets = parseInt(userInput.sets);
   const numOfRounds = parseInt(userInput.rounds);
   const breakLength = userInput.break === "" ? 0 : parseInt(userInput.break);
   const restLength = userInput.rest === "" ? 0 : parseInt(userInput.rest);
   const exerciseLength = parseInt(userInput.length);
-  console.log(exerciseList.length);
+  const breakObj = { name: "Break", id: breakId, length: userInput.break };
 
   let workoutOrderArray = [];
   const exercisesArray = exerciseList;
   const updatedArray = exercisesArray.map((item) => {
     if (item.name === "Break") {
-      return {
-        name: item.name,
-        id: breakId,
-        length: breakLength,
-      };
+      return breakObj;
     } else {
       return {
         name: item.name,
@@ -140,28 +132,29 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
       }
     } else {
       workoutOrderArray.pop();
-      workoutOrderArray.push({
-        name: "Break",
-        id: breakId,
-        length: breakLength,
-      });
+      workoutOrderArray.push(breakObj);
     }
   }
 
   // repeat rounds based on user input
-  let addRepeatRound = [];
-  for (let i = 0; i < numOfRounds; i++) {
-    addRepeatRound.push(...workoutOrderArray);
+  const lastIndex = workoutOrderArray.length - 1;
+  // remove last element if break or rest
+  if (workoutOrderArray.length > 1) {
+    if (
+      workoutOrderArray[lastIndex].name === "Rest" ||
+      workoutOrderArray[lastIndex].name === "Break"
+    ) {
+      workoutOrderArray.pop();
+    }
   }
 
-  // remove last element if break or rest
-  if (addRepeatRound.length > 1 && workoutOrderArray.length > 0) {
-    if (
-      addRepeatRound[workoutOrderArray.length - 1].name === "Rest" ||
-      addRepeatRound[workoutOrderArray.length - 1].name === "Break"
-    ) {
-      addRepeatRound.pop();
-    }
+  let addRepeatRound = [];
+  if (numOfRounds > 1) workoutOrderArray.push(breakObj);
+
+  console.log(workoutOrderArray.map((e) => e.name));
+
+  for (let i = 0; i < numOfRounds; i++) {
+    addRepeatRound.push(...workoutOrderArray);
   }
   return addRepeatRound;
 }

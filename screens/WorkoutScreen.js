@@ -44,7 +44,7 @@ function WorkoutScreen({ route, navigation }) {
   // 10sec rest
   // 45 sec rest
   // repeat * 2
-  // setCurrentRound(workout[0].round);
+
   useEffect(() => {
     navigation.setOptions({
       title: workoutName === null ? "Workout Generator" : workoutName,
@@ -111,7 +111,7 @@ function WorkoutScreen({ route, navigation }) {
     };
   }, [timer, hasPaused, hasStarted]);
 
-  console.log("time " + workoutTotalTime);
+  // console.log("time " + workoutTotalTime);
   function onPause() {
     hasPaused ? setHasPaused(false) : setHasPaused(true);
   }
@@ -134,10 +134,6 @@ function WorkoutScreen({ route, navigation }) {
           text: "OK",
           onPress: () => {
             navigation.goBack();
-            // navigation.navigate("generator", { minutes: 0 });
-
-            // setHasStarted(false);
-            // setIsFinished(false);
           },
         },
       ]

@@ -34,7 +34,7 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
           }}
         >
           <Text style={styles.myTextLength}>
-            {exercise.length}sec x{exercise.sets}
+            {exercise.length} sec x{exercise.sets}
           </Text>
 
           <Pressable
@@ -67,7 +67,7 @@ function ExerciseContainer({ workoutList, onRefresh, fromSaved }) {
           return (
             <View key={item.id} style={styles.roundContainer}>
               <Text style={styles.roundText}>{item.name}</Text>
-              <Text style={styles.roundText}>{item.length}sec</Text>
+              <Text style={styles.roundText}>{item.length} sec</Text>
             </View>
           );
         } else {

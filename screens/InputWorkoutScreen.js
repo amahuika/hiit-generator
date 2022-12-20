@@ -45,7 +45,7 @@ function InputWorkoutScreen({ route, navigation }) {
   }, [allData]);
 
   function generateHandler() {
-    if (minutes > 60) {
+    if (minutes > 60 || minutes < 5) {
       setValidInput(false);
       return;
     }
@@ -62,10 +62,21 @@ function InputWorkoutScreen({ route, navigation }) {
             placeholder="e.g. 20"
             keyboardType="numeric"
             value={minutes}
-            onChangeText={setMinutes}
+            onChangeText={(text) => {
+              setMinutes(text);
+              if (text > 60 || text < 5) {
+                setValidInput(false);
+              } else {
+                setValidInput(true);
+              }
+            }}
             onSubmitEditing={generateHandler}
           />
-          {!validInput && <Text>Please enter a number between 5 and 60</Text>}
+          {!validInput && (
+            <Text style={{ color: "#ff8f8f" }}>
+              Please enter between 5 and 60
+            </Text>
+          )}
           <MyButton
             style={styles.GenerateButton}
             txtStyle={styles.btnText}

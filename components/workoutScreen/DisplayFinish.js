@@ -17,13 +17,14 @@ function DisplayFinish({
   const [isSaved, setIsSaved] = useState(false);
   const navigation = useNavigation();
 
+  // create a list to be saved to db if it is not null
   exercises.shift();
   let updatedList;
   const getBreakId = exercises.find((item) => item.name === "Break");
-
+  // console.log(exercises.map((e) => e.id));
   if (workoutListForDb !== null) {
     updatedList = workoutListForDb.map((item) => {
-      if (item.name === "Break" && getBreakId !== undefined) {
+      if (item.name === "Break" && getBreakId.id !== undefined) {
         return {
           name: "Break",
           id: getBreakId.id,
@@ -34,12 +35,6 @@ function DisplayFinish({
       }
     });
   }
-
-  console.log("total time " + workoutTotalTime);
-
-  // const filteredExercises = filterOutRests.filter(
-  //   (value, index, array) => array.indexOf(value) === index
-  // );
 
   function modalHandler() {
     showModal ? setShowModal(false) : setShowModal(true);

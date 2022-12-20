@@ -12,40 +12,53 @@ import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import Card from "../components/Card";
 
+const db = DatabaseConnection.getConnection();
+
 function GenerateScreen({ route, navigation }) {
   const [minutes, setMinutes] = useState(25);
   const [exerciseList, setExerciseList] = useState([]);
   const [workout, setWorkout] = useState([]);
   const [totalTime, setTotalTime] = useState("");
   const [allData, setAllData] = useState([]);
+  const [breakId, setBreakId] = useState(null);
+
+  const [workoutInfo, setWorkoutInfo] = useState({
+    name: null,
+    sets: 3,
+    length: 20,
+    rest: 10,
+    break: 45,
+    rounds: null,
+  });
 
   const allExercises = route.params.allData;
   const userMinutes = route.params.minutes;
   useEffect(() => {
     setMinutes(userMinutes);
     setAllData(allExercises);
+    if (breakId === null) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE name = ?",
+          ["Break"],
+          (tx, results) => {
+            setBreakId(results.rows._array[0].id);
+          }
+        );
+      });
+    }
 
-    if (allData.length > 0 && exerciseList.length === 0) {
+    if (allData.length > 0 && exerciseList.length === 0 && breakId !== null) {
+      console.log(breakId);
       generateHandler();
     }
     if (exerciseList.length > 0) {
       MyWorkoutOrder();
     }
-  }, [minutes, exerciseList]);
+  }, [minutes, exerciseList, breakId]);
 
   function generateHandler() {
     Keyboard.dismiss();
-
-    const UpperBody = allData.filter(
-      (exercise) => exercise.type === "Upper Body"
-    );
-    const LowerBody = allData.filter(
-      (exercise) => exercise.type === "Lower Body"
-    );
-    const Core = allData.filter((exercise) => exercise.type === "Core");
-    const FullBody = allData.filter(
-      (exercise) => exercise.type === "Full Body"
-    );
 
     let workoutOrder = [];
     const exercises = [];
@@ -63,10 +76,10 @@ function GenerateScreen({ route, navigation }) {
     let round = 1;
     for (let i = 0; i < exercisesToRetrieve; i++) {
       exercises.push(
-        GetExercises(UpperBody, round, 20),
-        GetExercises(LowerBody, round, 20),
-        GetExercises(Core, round, 20),
-        GetExercises(FullBody, round, 20)
+        GetExercises(allData, round, 20),
+        GetExercises(allData, round, 20),
+        GetExercises(allData, round, 20),
+        GetExercises(allData, round, 20)
       );
 
       round++;
@@ -78,7 +91,7 @@ function GenerateScreen({ route, navigation }) {
       for (let i = 1; i < exercises.length; i++) {
         if (i % 4 === 0) {
           addedBreaks.push({
-            id: Math.random() * i,
+            id: breakId,
             length: 45,
             round: exercises[i].round,
             name: "Break",
@@ -96,11 +109,15 @@ function GenerateScreen({ route, navigation }) {
   }
 
   function MyWorkoutOrder() {
+    // console.log(breakId);
+
+    // console.log(exerciseList.map((e) => e.id));
     let workoutOrder;
+
     const exercises = exerciseList.filter((item) => item.name !== "Break");
     workoutOrder = GetWorkoutOrder(exercises, minutes);
 
-    AddBreaks(workoutOrder);
+    AddBreaks(workoutOrder, breakId);
 
     setWorkout((val) => [...workoutOrder]);
 
@@ -108,24 +125,33 @@ function GenerateScreen({ route, navigation }) {
     workoutOrder.map((item) => (totalInSeconds += item.length));
     setTotalTime(displayTimeRemaining(totalInSeconds));
   }
+  // console.log(exerciseList.map((e) => e.name));
 
   function startHandler() {
     // console.log(workout);
     navigation.navigate("workout", {
       workout: workout,
-      totalTime: totalTime,
+      workoutTotalTime: totalTime,
       workoutName: null,
+      workoutInfo: workoutInfo,
+      workoutListForDb: exerciseList,
     });
+
+    // const workout = route.params.workout;
+    // const workoutInfo = route.params.workoutInfo;
+    // const workoutName = route.params.workoutName;
+    // const workoutListForDb = route.params.workoutListForDb;
+    // const workoutTotalTime = route.params.workoutTotalTime;
   }
 
   function onRefreshExercise(exercise, index) {
-    const newExercise = allData.filter((item) => item.type === exercise.type);
+    const newExercise = allData;
     let cloneExerciseList = [...exerciseList];
     // get new exercise with different id
     let currentIds = cloneExerciseList.map((item) => item.id);
     let selected;
     do {
-      selected = GetExercises(newExercise, exercise.round);
+      selected = GetExercises(newExercise, exercise.round, 20);
     } while (currentIds.includes(selected.id));
 
     cloneExerciseList[index] = selected;

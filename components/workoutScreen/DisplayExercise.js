@@ -3,12 +3,26 @@ import CenteredView from "../CenteredView";
 
 function DisplayExercise({ title, length, description }) {
   return (
-    <View style={styles.exerciseContainer}>
+    <View
+      style={
+        title === "Break" ? styles.breakContainer : styles.exerciseContainer
+      }
+    >
       <CenteredView>
-        <Text style={styles.exerciseText}>{title}</Text>
+        <Text
+          style={title === "Break" ? styles.breakText : styles.exerciseText}
+        >
+          {title}
+        </Text>
       </CenteredView>
       <CenteredView>
-        <Text>{length} sec</Text>
+        <Text
+          style={
+            title === "Break" ? { color: "#EEEEEE" } : { color: "#393E46" }
+          }
+        >
+          {length} sec
+        </Text>
       </CenteredView>
       {description !== undefined && (
         <>
@@ -42,9 +56,26 @@ const styles = StyleSheet.create({
   },
   exerciseText: {
     fontSize: 24,
+    color: "#222831",
   },
   descriptionText: {
     fontSize: 18,
     paddingTop: 16,
+  },
+  breakContainer: {
+    borderColor: "black",
+    borderWidth: 0.5,
+    borderRadius: 8,
+    padding: 16,
+
+    marginBottom: 8,
+
+    elevation: 4,
+    backgroundColor: "#00ADB5",
+  },
+  breakText: {
+    fontSize: 24,
+
+    color: "#EEEEEE",
   },
 });

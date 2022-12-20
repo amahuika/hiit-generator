@@ -49,32 +49,33 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
                 }
               );
             }
-            // setWorkoutList((val) => [...val, item]);
           }
         );
       });
     }
 
     if (workoutList.length > 0) {
-      const getWorkoutOrder = generateCustomWorkout(
-        workoutDetails,
-        workoutList,
-        breakId
-      );
-      // console.log("Workout Order " + getWorkoutOrder.map((item) => item.name));
-      setWorkoutOrder((_) => [...getWorkoutOrder]);
-      let count = 0;
-      getWorkoutOrder.map((item) => (count += item.length));
-      const totalTime = displayTimeRemaining(count);
-      setTotalTime(totalTime);
+      // check if rounds is null id it is then this is a random workout
+      if (workoutDetails.rounds === null) {
+        MyRandomWorkoutOrder();
+      } else {
+        const getWorkoutOrder = generateCustomWorkout(
+          workoutDetails,
+          workoutList,
+          breakId
+        );
+
+        setWorkoutOrder((_) => [...getWorkoutOrder]);
+
+        let count = 0;
+        getWorkoutOrder.map((item) => (count += item.length));
+        const totalTime = displayTimeRemaining(count);
+        setTotalTime(totalTime);
+      }
     }
   }, [workoutList]);
 
   function startHandler() {
-    // console.log("Start");
-
-    console.log(workoutOrder);
-    // console.log(workoutList.length);
     navigation.navigate("workout", {
       workout: workoutOrder,
       workoutName: workoutDetails.name,
@@ -82,6 +83,25 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
       workoutListForDb: null,
       workoutTotalTime: totalTime,
     });
+  }
+
+  function MyRandomWorkoutOrder() {
+    // console.log(breakId);
+    const minutes = parseInt(workoutDetails.total_time.split(":").shift());
+    // console.log(exerciseList.map((e) => e.id));
+
+    let workoutOrder;
+
+    const exercises = workoutList.filter((item) => item.name !== "Break");
+    workoutOrder = GetWorkoutOrder(exercises, minutes);
+
+    AddBreaks(workoutOrder, breakId);
+
+    setWorkoutOrder((val) => [...workoutOrder]);
+
+    let totalInSeconds = 0;
+    workoutOrder.map((item) => (totalInSeconds += item.length));
+    setTotalTime(displayTimeRemaining(totalInSeconds));
   }
 
   return (
