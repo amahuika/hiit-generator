@@ -90,7 +90,9 @@ function HomeScreen({ route, navigation }) {
     navigation.navigate("myWorkouts");
   }
 
-  function exercisesHandler() {}
+  function exercisesHandler() {
+    navigation.navigate("exercises");
+  }
 
   return (
     <View style={styles.container}>

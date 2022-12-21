@@ -8,8 +8,63 @@ import DisplaySavedWorkoutScreen from "../../screens/DisplaySavedWorkoutScreen";
 import SelectionScreen from "../../screens/SelectionScreen";
 import { createStackNavigator } from "@react-navigation/stack";
 import CustomInputScreen from "../../screens/CustomInputScreen";
+import ExercisesScreen from "../../screens/ExercisesScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import CategoryScreen from "../../screens/CategoryScreen";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function MyTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#393E46" },
+        tabBarStyle: {
+          backgroundColor: "#393E46",
+          borderTopWidth: 0,
+          paddingBottom: 4,
+        },
+        headerTitleStyle: { color: "#00ADB5", fontSize: 24 },
+        tabBarActiveTintColor: "#00ADB5",
+        tabBarInactiveTintColor: "#EEEEEE",
+      }}
+    >
+      <Tab.Screen
+        name="exercise"
+        component={ExercisesScreen}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => {
+            return (
+              <MaterialCommunityIcons
+                name="weight-lifter"
+                size={24}
+                color={color}
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name="category"
+        component={CategoryScreen}
+        options={{
+          title: "Categories",
+          tabBarIcon: ({ focused, color, size }) => {
+            return (
+              <MaterialCommunityIcons
+                name="format-list-bulleted"
+                size={24}
+                color={color}
+              />
+            );
+          },
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 function MyStack(props) {
   return (
@@ -39,6 +94,11 @@ function MyStack(props) {
         <Stack.Screen
           name="displaySavedWorkout"
           component={DisplaySavedWorkoutScreen}
+        />
+        <Stack.Screen
+          name="exercises"
+          component={MyTabs}
+          options={{ title: "Exercises", headerShown: false }}
         />
         <Stack.Screen
           name="selection"

@@ -89,7 +89,7 @@ function CustomInputScreen({ route, navigation }) {
         if (workoutOrder.length > 0) {
           return (
             <Pressable style={{ marginEnd: 32 }} onPress={onSaveWorkout}>
-              <Ionicons name="star-outline" size={34} color="#00ADB5" />
+              <Ionicons name="star-outline" size={30} color="#00ADB5" />
             </Pressable>
           );
         } else {

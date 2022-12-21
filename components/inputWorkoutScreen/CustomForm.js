@@ -1,5 +1,5 @@
 import { View, Text, TextInput, StyleSheet } from "react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Card from "../Card";
 
@@ -10,6 +10,12 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
   const [inputRest, setInputRest] = useState(userInput.rest);
   const [inputBreak, setInputBreak] = useState(userInput.break);
   const [inputRounds, setInputRounds] = useState(userInput.rounds);
+
+  const setsRef = useRef();
+  const lengthRef = useRef();
+  const restRef = useRef();
+  const breaksRef = useRef();
+  const roundsRef = useRef();
 
   function handler() {
     const inputs = {
@@ -46,6 +52,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             placeholder="Eg 3"
             keyboardType="number-pad"
             onEndEditing={handler}
+            ref={setsRef}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -57,6 +64,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             placeholder="25"
             keyboardType="number-pad"
             onEndEditing={handler}
+            ref={lengthRef}
           />
         </View>
       </View>
@@ -69,6 +77,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onChangeText={setInputRest}
             keyboardType="number-pad"
             onEndEditing={handler}
+            ref={restRef}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -79,6 +88,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onChangeText={setInputBreak}
             keyboardType="number-pad"
             onEndEditing={handler}
+            ref={breaksRef}
           />
         </View>
       </View>
@@ -91,6 +101,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onChangeText={setInputRounds}
             keyboardType="number-pad"
             onEndEditing={handler}
+            ref={roundsRef}
           />
         </View>
         <View
