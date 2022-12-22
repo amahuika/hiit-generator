@@ -29,6 +29,7 @@ function MyTabs() {
         headerTitleStyle: { color: "#00ADB5", fontSize: 24 },
         tabBarActiveTintColor: "#00ADB5",
         tabBarInactiveTintColor: "#EEEEEE",
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen

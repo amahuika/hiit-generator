@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Keyboard, StyleSheet, Text, TextInput, View } from "react-native";
 import Modal from "react-native-modal";
 import MyButton from "./MyButton";
 import RowSpaceBetween from "./RowSpaceBetween";
@@ -11,6 +11,8 @@ function AddNewExerciseModal({
   isOpen,
   toggleModal,
   onAddExercise,
+  isEdit,
+  editExercise,
 }) {
   const [onFocusStyle, setOnFocusStyle] = useState({
     backgroundColor: "#EEEEEE",
@@ -18,8 +20,13 @@ function AddNewExerciseModal({
   });
   const [categoryId, setCategoryId] = useState();
   const [name, setName] = useState();
-  const [description, setDescription] = useState(null);
+  const [description, setDescription] = useState();
   const [isValid, setIsValid] = useState(true);
+  const [isUpdateNameOnEdit, setIsUpdateNameOnEdit] = useState(false);
+  const [isUpdateDescriptionOnEdit, setIsUpdateDescriptionOnEdit] =
+    useState(false);
+  const [isUpdateCategoryOnEdit, setIsUpdateCategoryOnEdit] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const descriptionRef = useRef();
@@ -39,24 +46,89 @@ function AddNewExerciseModal({
       //   console.log("passed");
       onAddExercise(name, categoryId, description);
 
-      setName();
-      setCategoryId();
-      setDescription(null);
+      resetInput();
     }
+  }
+
+  function renderNameValue() {
+    if (isEdit) {
+      if (isUpdateNameOnEdit) {
+        return name;
+      } else {
+        if (name !== editExercise.name) setName(editExercise.name);
+        return editExercise.name;
+      }
+    } else {
+      return name;
+    }
+  }
+  function renderDescriptionValue() {
+    if (isEdit) {
+      if (isUpdateDescriptionOnEdit) {
+        return description;
+      } else {
+        if (description !== editExercise.description)
+          setDescription(editExercise.description);
+        return editExercise.description;
+      }
+    } else {
+      return description;
+    }
+  }
+  function renderCategory() {
+    const index = categories
+      .map((item) => item.value)
+      .indexOf(editExercise.category_id);
+
+    if (isEdit) {
+      if (isUpdateCategoryOnEdit) {
+        return null;
+      } else {
+        if (categoryId !== editExercise.category_id) {
+          setCategoryId(editExercise.category_id);
+          // setIsUpdateCategoryOnEdit(true);
+        }
+        return index;
+      }
+    } else {
+      return categoryId;
+    }
+  }
+
+  function resetInput() {
+    setName();
+    setDescription();
+    setCategoryId();
+    setIsUpdateNameOnEdit(false);
+    setIsUpdateDescriptionOnEdit(false);
+    setIsUpdateCategoryOnEdit(false);
   }
 
   return (
     <View>
-      <Modal isVisible={isOpen} onBackdropPress={() => toggleModal()}>
+      <Modal
+        isVisible={isOpen}
+        onBackdropPress={() => {
+          setIsValid(true);
+
+          resetInput();
+
+          toggleModal("close");
+        }}
+      >
         <View style={styles.innerModalView}>
-          <Text style={{ fontSize: 20 }}>Add new exercise to database</Text>
+          <Text style={{ fontSize: 20 }}>
+            {isEdit ? "Edit exercise" : "Add new exercise to database"}
+          </Text>
           {!isValid && <Text style={{ color: "#e36666" }}>{errorMessage}</Text>}
           <View style={[styles.inputContainer]}>
             <Text>Name</Text>
             <TextInput
-              value={name}
+              value={renderNameValue()}
               style={[styles.input, onFocusStyle]}
               onChangeText={(text) => {
+                setIsUpdateNameOnEdit(true);
+
                 setIsValid(true);
                 setName(text);
               }}
@@ -77,12 +149,13 @@ function AddNewExerciseModal({
           <View style={[styles.inputContainer]}>
             <Text>Category</Text>
             <SelectDropdown
-              defaultValue={categoryId}
               data={categories}
+              defaultValueByIndex={renderCategory()}
               onSelect={(item, index) => {
                 setIsValid(true);
                 setCategoryId(item.value);
               }}
+              onFocus={() => setIsUpdateCategoryOnEdit(true)}
               rowTextForSelection={(item, index) => item.label}
               buttonTextAfterSelection={(item, index) => item.label}
               buttonStyle={{
@@ -103,20 +176,31 @@ function AddNewExerciseModal({
           <View style={styles.inputContainer}>
             <Text>Description</Text>
             <TextInput
-              value={description}
+              value={renderDescriptionValue()}
               style={styles.input}
               multiline={true}
-              onChangeText={setDescription}
+              onChangeText={(text) => {
+                setIsUpdateDescriptionOnEdit(true);
+                setDescription(text);
+              }}
             />
           </View>
 
           {/* //Buttons */}
           <RowSpaceBetween>
             <View style={[styles.btnWidth]}>
-              <MyButton onPress={onAdd} text={"Add"} />
+              <MyButton onPress={onAdd} text={isEdit ? "Update" : "Add"} />
             </View>
             <View style={[styles.btnWidth]}>
-              <MyButton onPress={() => toggleModal()} text={"Cancel"} />
+              <MyButton
+                onPress={() => {
+                  setIsValid(true);
+
+                  resetInput();
+                  toggleModal("close");
+                }}
+                text={"Cancel"}
+              />
             </View>
           </RowSpaceBetween>
         </View>

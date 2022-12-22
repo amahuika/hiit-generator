@@ -1,0 +1,20 @@
+
+//// To DO ///////
+*Crud for category page.
+*Add a new exercise to database on customer workout screen.
+*option to view the full workout. maybe on a new screen? button from footer on edit mode.
+*make sure all exercises get deleted when the corresponding category gets deleted.
+*add icon for app.
+
+*create a snack version
+*test.
+
+*figure out how to publish to app store
+
+
+//// BUGS to fix //////////
+update the total time on skip on the workout Screen
+workout saved when name is blank.
+update the save workout button on the modal to myButton
+remove the back arrow on the edit mode
+

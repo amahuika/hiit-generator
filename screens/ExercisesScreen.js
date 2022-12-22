@@ -24,6 +24,12 @@ function ExercisesScreen({ navigation, route }) {
   const [exercises, setExercises] = useState([]);
   const [categoryId, setCategoryId] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editExercise, setEditExercise] = useState({
+    name: undefined,
+    category_id: undefined,
+    description: null,
+  });
 
   const toast = useToast();
 
@@ -101,25 +107,71 @@ function ExercisesScreen({ navigation, route }) {
   }
 
   function onEdit(id) {
-    console.log("Edit: " + id);
-  }
-
-  function addNewExercise(name, categoryId, description) {
     db.transaction((tx) => {
       tx.executeSql(
-        "INSERT INTO exercises (name, category_id, description) VALUES (?,?,?)",
-        [name, categoryId, description],
+        "SELECT * FROM exercises WHERE id = ?",
+        [id],
         (tx, results) => {
-          console.log(results.rowsAffected);
+          const length = results.rows.length;
+          if (length > 0) {
+            setEditExercise(results.rows._array[0]);
+            console.log(results.rows._array[0]);
+          }
         }
       );
     });
-    RefreshExerciseList();
+
+    setIsEdit(true);
     toggleModal();
   }
 
-  function toggleModal() {
+  function addNewExercise(name, categoryId, description) {
+    if (isEdit) {
+      console.log("update " + name, categoryId);
+      db.transaction((tx) => {
+        tx.executeSql(
+          "UPDATE exercises SET name = ?, category_id = ?, description = ? WHERE id =?",
+          [name, categoryId, description, editExercise.id],
+          (tx, results) => {
+            console.log(results.rowsAffected);
+          }
+        );
+      });
+    } else {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "INSERT INTO exercises (name, category_id, description) VALUES (?,?,?)",
+          [name, categoryId, description],
+          (tx, results) => {
+            console.log(results.rowsAffected);
+          }
+        );
+      });
+      toast.show("Exercise Added successfully!", {
+        type: "success",
+        placement: "bottom",
+        animationType: "slide-in",
+        duration: 4000,
+      });
+    }
+
+    toggleModal("close");
+
+    RefreshExerciseList();
+  }
+
+  function toggleModal(action) {
     isModalOpen ? setIsModalOpen(false) : setIsModalOpen(true);
+    if (action === "close") {
+      if (isEdit) {
+        setIsEdit(false);
+        setEditExercise({
+          name: undefined,
+          category_id: undefined,
+          description: null,
+        });
+      }
+    }
   }
 
   function RefreshExerciseList() {
@@ -139,7 +191,6 @@ function ExercisesScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Category</Text>
       <View style={{ flexDirection: "row" }}>
         <SelectDropdown
           data={categories}
@@ -178,6 +229,8 @@ function ExercisesScreen({ navigation, route }) {
         <Ionicons name="add" size={36} color="#EEEEEE" />
       </Pressable>
       <AddNewExerciseModal
+        isEdit={isEdit}
+        editExercise={editExercise}
         categories={categories}
         isOpen={isModalOpen}
         toggleModal={toggleModal}
