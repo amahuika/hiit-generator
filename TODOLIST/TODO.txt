@@ -5,7 +5,7 @@
 *option to view the full workout. maybe on a new screen? button from footer on edit mode.
 *make sure all exercises get deleted when the corresponding category gets deleted.
 *add icon for app.
-
+*fix up styling
 *create a snack version
 *test.
 
