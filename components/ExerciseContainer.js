@@ -34,7 +34,7 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
           }}
         >
           <Text style={styles.myTextLength}>
-            {exercise.length} sec x{exercise.sets}
+            {exercise.length} sec x3{exercise.sets}
           </Text>
 
           <Pressable

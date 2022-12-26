@@ -138,7 +138,7 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
 
   if (restLength === 0)
     workoutOrderArray = workoutOrderArray.filter((i) => i.name !== "Rest");
-  console.log(workoutOrderArray.map((e) => e.name));
+  // console.log(workoutOrderArray.map((e) => e.name));
   // repeat rounds based on user input
   // remove last element if break or rest
 
@@ -150,8 +150,6 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
   let addRepeatRound = [];
   if (numOfRounds > 1) updateWorkoutOrder.push(breakObj);
 
-  console.log(updateWorkoutOrder.map((e) => e.name));
-
   for (let i = 0; i < numOfRounds; i++) {
     addRepeatRound.push(...updateWorkoutOrder);
   }
@@ -159,6 +157,9 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
     addRepeatRound.length >= 2
       ? checkLastForBreakOrRest(addRepeatRound)
       : addRepeatRound;
+  console.log(
+    "Generate custom workout length: " + finalUpdatedWorkoutOrder.length
+  );
 
   return finalUpdatedWorkoutOrder;
 }

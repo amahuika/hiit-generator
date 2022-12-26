@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { View, Text, Button, StyleSheet, TextInput } from "react-native";
 import Modal from "react-native-modal";
+import MyButton from "../MyButton";
 
 function SaveWorkoutModal({ toggle, showModal, saveHandler }) {
-  const [nameInput, setNameInput] = useState();
+  const [nameInput, setNameInput] = useState("");
+  const [isValid, setIsValid] = useState(true);
 
   function modalCloseHandler() {
     toggle();
   }
 
   function onSave() {
+    if (nameInput === "") {
+      setIsValid(false);
+      return;
+    }
     saveHandler(nameInput);
 
     setNameInput("");
@@ -25,13 +31,25 @@ function SaveWorkoutModal({ toggle, showModal, saveHandler }) {
           <Text>Name your workout</Text>
           <TextInput
             style={styles.input}
-            onChangeText={setNameInput}
+            onChangeText={(txt) => {
+              setIsValid(true);
+              setNameInput(txt);
+            }}
             value={nameInput}
             placeholder="Your workout name"
           />
-
+          {!isValid && (
+            <Text style={{ color: "#f35858" }}>
+              * Please enter a valid name
+            </Text>
+          )}
           <View style={styles.btn}>
-            <Button title="Save" onPress={onSave} color={"#00ADB5"} />
+            <MyButton
+              text={"Save"}
+              onPress={onSave}
+              style={{ backgroundColor: "#00ADB5" }}
+              txtStyle={{ color: "#EEEEEE", fontSize: 20 }}
+            />
           </View>
         </View>
       </Modal>

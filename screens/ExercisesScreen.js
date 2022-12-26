@@ -8,15 +8,16 @@ import {
 } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import Card from "../components/Card";
 import RowSpaceBetween from "../components/RowSpaceBetween";
 import DisplayList from "../components/ExercisesScreen/DisplayList";
-import { useToast } from "react-native-toast-notifications";
 import AddNewExerciseModal from "../components/AddNewExerciseModal";
-
+import FloatingButton from "../components/FloatingButton";
+import { useFocusEffect } from "@react-navigation/native";
+import { useToast } from "react-native-toast-notifications";
 const db = DatabaseConnection.getConnection();
 
 function ExercisesScreen({ navigation, route }) {
@@ -31,7 +32,17 @@ function ExercisesScreen({ navigation, route }) {
     description: null,
   });
 
-  const toast = useToast();
+  // setting up toast notifications
+  const toaster = useToast();
+  const toast = {
+    showToast: (text) =>
+      toaster.show(text, {
+        type: "success",
+        placement: "bottom",
+        animationType: "slide-in",
+        duration: 4000,
+      }),
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -47,39 +58,60 @@ function ExercisesScreen({ navigation, route }) {
         );
       },
     });
+  }, []);
 
-    if (categories.length === 0) {
+  useFocusEffect(
+    useCallback(() => {
       db.transaction((tx) => {
         tx.executeSql(
           "SELECT category.id AS value, category.name AS label FROM category",
           [],
           (tx, results) => {
+            const noCatObj = { value: null, label: "No Category" };
             if (results.rows.length > 0) {
-              setCategories((val) => [...results.rows._array]);
+              setCategories((val) => [...results.rows._array, noCatObj]);
             }
           }
         );
       });
-    }
-  }, []);
+    }, [])
+  );
 
   function returnHome() {
     navigation.navigate("home");
   }
 
   function onSelectCat(catId) {
+    console.log(catId);
     setCategoryId(catId);
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM exercises WHERE category_id = ?",
-        [catId],
-        (tx, results) => {
-          if (results.rows.length > 0) {
+
+    if (catId === null) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id IS NULL",
+          [],
+          (tx, results) => {
+            const resultsArray = results.rows._array;
+            if (results.rows.length > 0) {
+              const filterOutBreak = resultsArray.filter(
+                (item) => item.name !== "Break"
+              );
+              setExercises((val) => [...filterOutBreak]);
+            }
+          }
+        );
+      });
+    } else {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id = ?",
+          [catId],
+          (tx, results) => {
             setExercises((val) => [...results.rows._array]);
           }
-        }
-      );
-    });
+        );
+      });
+    }
   }
 
   function onDelete(exerciseId) {
@@ -98,12 +130,8 @@ function ExercisesScreen({ navigation, route }) {
         }
       );
     });
-    toast.show("Exercise deleted successfully!", {
-      type: "success",
-      placement: "bottom",
-      animationType: "slide-in",
-      duration: 4000,
-    });
+
+    toast.showToast("Exercise deleted successfully!");
   }
 
   function onEdit(id) {
@@ -127,7 +155,7 @@ function ExercisesScreen({ navigation, route }) {
 
   function addNewExercise(name, categoryId, description) {
     if (isEdit) {
-      console.log("update " + name, categoryId);
+      // console.log("update " + name, categoryId);
       db.transaction((tx) => {
         tx.executeSql(
           "UPDATE exercises SET name = ?, category_id = ?, description = ? WHERE id =?",
@@ -137,6 +165,7 @@ function ExercisesScreen({ navigation, route }) {
           }
         );
       });
+      toast.showToast("Exercise updated successfully!");
     } else {
       db.transaction((tx) => {
         tx.executeSql(
@@ -147,12 +176,7 @@ function ExercisesScreen({ navigation, route }) {
           }
         );
       });
-      toast.show("Exercise Added successfully!", {
-        type: "success",
-        placement: "bottom",
-        animationType: "slide-in",
-        duration: 4000,
-      });
+      toast.showToast("Exercise Added successfully!");
     }
 
     toggleModal("close");
@@ -176,22 +200,47 @@ function ExercisesScreen({ navigation, route }) {
 
   function RefreshExerciseList() {
     db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM exercises WHERE category_id = ?",
-        [categoryId],
-        (tx, results) => {
-          setExercises((val) => [...results.rows._array]);
-        }
-      );
+      if (categoryId === null) {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id IS NULL",
+          [],
+          (tx, results) => {
+            const resultsArray = results.rows._array;
+            if (results.rows.length > 0) {
+              const filterOutBreak = resultsArray.filter(
+                (item) => item.name !== "Break"
+              );
+
+              setExercises((val) => [...filterOutBreak]);
+            }
+          },
+          (tx, error) => {
+            console.log(error.message);
+          }
+        );
+      } else {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id = ?",
+          [categoryId],
+          (tx, results) => {
+            setExercises((val) => [...results.rows._array]);
+          },
+          (tx, error) => {
+            console.log(error.message);
+          }
+        );
+      }
     });
   }
-  //   console.log(exercises.map((e) => e.id));
-  //to do add a modal component to pop up to enter a new exercise name / category / description is optional.
-  // re use the modal component for the custom input page when making a new workout.
 
   return (
     <View style={styles.container}>
-      <View style={{ flexDirection: "row" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
         <SelectDropdown
           data={categories}
           onSelect={(item, index) => {
@@ -220,14 +269,24 @@ function ExercisesScreen({ navigation, route }) {
             onEdit={onEdit}
           />
         ))}
+        {categoryId === undefined && (
+          <Card>
+            <Text style={{ textAlign: "center" }}>Select a category</Text>
+          </Card>
+        )}
+        {categoryId !== undefined && (
+          <View>
+            {exercises.length === 0 && (
+              <Card>
+                <Text style={{ textAlign: "center" }}>No Results</Text>
+              </Card>
+            )}
+          </View>
+        )}
       </ScrollView>
-      <Pressable
-        android_ripple={{ color: "#EEEEEE", foreground: true }}
-        style={styles.addButton}
-        onPress={toggleModal}
-      >
-        <Ionicons name="add" size={36} color="#EEEEEE" />
-      </Pressable>
+
+      <FloatingButton Ionicon={"add"} onPress={toggleModal} />
+
       <AddNewExerciseModal
         isEdit={isEdit}
         editExercise={editExercise}
@@ -245,20 +304,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#222831",
+    padding: 8,
   },
   text: {
     color: "#EEEEEE",
-  },
-  addButton: {
-    overflow: "hidden",
-    width: 60,
-    height: 60,
-    borderRadius: 100,
-    position: "absolute",
-    bottom: 30,
-    right: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#00ADB5",
   },
 });

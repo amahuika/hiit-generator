@@ -24,7 +24,7 @@ function DisplayFinish({
   exercises.shift();
   let updatedList;
   const getBreakId = exercises.find((item) => item.name === "Break");
-  console.log(exercises.map((e) => e.id));
+  // console.log(exercises.map((e) => e.id));
   if (workoutListForDb !== null) {
     updatedList = workoutListForDb.map((item) => {
       if (item.name === "Break" && getBreakId.id !== undefined) {
@@ -112,9 +112,8 @@ function DisplayFinish({
       />
       <View style={styles.innerContainer}>
         <Text style={styles.congratulationText}>Congratulations!</Text>
-        <Text style={styles.mainText}>Total time: {workoutTotalTime}</Text>
 
-        <Text style={styles.amazingText}>You are amazing!</Text>
+        <Text style={styles.amazingText}>Total time: {workoutTotalTime}</Text>
       </View>
       <View>
         {workoutListForDb !== null && (
@@ -124,7 +123,7 @@ function DisplayFinish({
             txtStyle={styles.buttonText}
             onPress={() => {
               if (!isSaved) {
-                if (workoutInfo.name !== "") {
+                if (workoutInfo.name !== null) {
                   saveWorkoutHandler(workoutInfo.name);
                 } else {
                   modalHandler();

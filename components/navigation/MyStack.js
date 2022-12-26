@@ -12,6 +12,7 @@ import ExercisesScreen from "../../screens/ExercisesScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import CategoryScreen from "../../screens/CategoryScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import PreviewScreen from "../../screens/PreviewScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -110,6 +111,11 @@ function MyStack(props) {
           name="customInput"
           component={CustomInputScreen}
           options={{ title: "Custom Workout" }}
+        />
+        <Stack.Screen
+          name="preview"
+          component={PreviewScreen}
+          options={{ title: "Preview" }}
         />
         <Stack.Screen
           name="input"

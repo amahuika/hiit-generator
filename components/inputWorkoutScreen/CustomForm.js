@@ -44,15 +44,22 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={[styles.inputContainer, { width: "45%" }]}>
-          <Text style={styles.inputLabel}>Sets</Text>
+          <Text style={styles.inputLabel}>Number of sets</Text>
           <TextInput
             style={styles.input}
             value={inputSets}
-            onChangeText={setInputSets}
+            onChangeText={(text) => {
+              if (text < 1 || text.includes("-")) {
+                setInputSets(1);
+              } else {
+                setInputSets((val) => text);
+              }
+            }}
             placeholder="Eg 3"
             keyboardType="number-pad"
             onEndEditing={handler}
             ref={setsRef}
+            maxLength={2}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -65,6 +72,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             keyboardType="number-pad"
             onEndEditing={handler}
             ref={lengthRef}
+            maxLength={3}
           />
         </View>
       </View>
@@ -78,6 +86,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             keyboardType="number-pad"
             onEndEditing={handler}
             ref={restRef}
+            maxLength={3}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -89,6 +98,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             keyboardType="number-pad"
             onEndEditing={handler}
             ref={breaksRef}
+            maxLength={3}
           />
         </View>
       </View>
@@ -98,10 +108,17 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
           <TextInput
             style={styles.input}
             value={inputRounds}
-            onChangeText={setInputRounds}
+            onChangeText={(text) => {
+              if (text < 1 || text.includes("-")) {
+                setInputRounds(1);
+              } else {
+                setInputRounds((val) => text);
+              }
+            }}
             keyboardType="number-pad"
             onEndEditing={handler}
             ref={roundsRef}
+            maxLength={2}
           />
         </View>
         <View

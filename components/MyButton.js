@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     width: "100%",
     elevation: 4,
     backgroundColor: "#fefefe",
+    justifyContent: "center",
   },
   buttonText: {
     textAlign: "center",

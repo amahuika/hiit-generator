@@ -1,32 +1,30 @@
 import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-function EditButton({ onPress }) {
+function FloatingButton({ onPress, Ionicon }) {
   return (
     <Pressable
       android_ripple={{ color: "#EEEEEE", foreground: true }}
-      style={styles.editButton}
+      style={styles.button}
       onPress={() => onPress()}
     >
-      <Ionicons name="create-outline" size={36} color="white" />
+      <Ionicons name={Ionicon} size={36} color="#EEEEEE" />
     </Pressable>
   );
 }
-export default EditButton;
+export default FloatingButton;
 
 const styles = StyleSheet.create({
-  editButton: {
-    position: "absolute",
-    bottom: 90,
-    right: 8,
-    backgroundColor: "#00ADB5",
+  button: {
+    overflow: "hidden",
+    width: 60,
+    height: 60,
     borderRadius: 100,
-    padding: 10,
+    position: "absolute",
+    bottom: 30,
+    right: 20,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 4,
-    overflow: "hidden",
-    height: 60,
-    width: 60,
+    backgroundColor: "#00ADB5",
   },
 });

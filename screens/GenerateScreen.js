@@ -156,8 +156,9 @@ function GenerateScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <Card>
-        <Text>Exercise: 20 sec x3</Text>
-        <Text>Rest: 10 sec</Text>
+        <Text>Length of exercise: 20 sec</Text>
+        <Text>Number of sets: 3</Text>
+        <Text>Rest between exercises: 10 sec</Text>
         <Text>Break: 45 sec</Text>
         <Text>Total Time: {totalTime}</Text>
       </Card>

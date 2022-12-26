@@ -87,17 +87,17 @@ function WorkoutScreen({ route, navigation }) {
     }
 
     if (!hasStarted && totalTimeInSeconds === null) {
-      let totalTimeInSeconds = 0;
-      workout.map((item) => (totalTimeInSeconds += item.length));
-
-      setTotalTimeInSeconds(totalTimeInSeconds);
-      setTotalTime(displayTimeRemaining(totalTimeInSeconds));
       let myWorkout = [];
       if (workout[0].name !== "Get Ready") {
         myWorkout = [{ name: "Get Ready", length: 5 }, ...workout];
       } else {
         myWorkout = [...workout];
       }
+      let totalTimeInSeconds = 0;
+      myWorkout.map((item) => (totalTimeInSeconds += item.length));
+
+      setTotalTimeInSeconds(totalTimeInSeconds);
+      setTotalTime(displayTimeRemaining(totalTimeInSeconds));
       setCurrentExercise(myWorkout[0]);
       setTimer(myWorkout[0].length);
 
@@ -146,6 +146,7 @@ function WorkoutScreen({ route, navigation }) {
     }
     const newWorkout = [...workoutList];
     let totalTimeInSeconds = 0;
+
     newWorkout.map((item) => (totalTimeInSeconds += item.length));
     setTotalTimeInSeconds(totalTimeInSeconds);
     setTotalTime(displayTimeRemaining(totalTimeInSeconds));

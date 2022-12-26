@@ -1,24 +1,14 @@
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import Card from "../components/Card";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useState } from "react";
-import DropDownPicker from "react-native-dropdown-picker";
 import CustomForm from "../components/inputWorkoutScreen/CustomForm";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
-import SelectDropdown from "react-native-select-dropdown";
 import Checkbox from "expo-checkbox";
-import { StickyHeaderScrollView } from "react-native-simple-sticky-header";
 import DropdownPickers from "../components/inputWorkoutScreen/DropdownPickers";
 import DraggableFlatList, {
   ScaleDecorator,
+  NestableScrollContainer,
+  NestableDraggableFlatList,
 } from "react-native-draggable-flatlist";
 import {
   displayTimeRemaining,
@@ -26,6 +16,9 @@ import {
 } from "../HelperFunctions/HelperFunctions";
 import MyButton from "../components/MyButton";
 import EditButton from "../components/inputWorkoutScreen/EditButton";
+import { useEffect, useState } from "react";
+import uuid from "react-native-uuid";
+
 const db = DatabaseConnection.getConnection();
 
 function CustomInputScreen({ route, navigation }) {
@@ -81,25 +74,28 @@ function CustomInputScreen({ route, navigation }) {
     // generate a workout order
     if (exerciseList.length > 0) {
       generatesWorkout();
+    } else if (exerciseList.length === 0) {
+      setTotalWorkoutTime("00:00");
+      setWorkoutOrder([]);
     }
-
+    // console.log("use", isEdit);
     // header options
+
     navigation.setOptions({
       headerRight: () => {
-        if (workoutOrder.length > 0) {
-          return (
-            <Pressable style={{ marginEnd: 32 }} onPress={onSaveWorkout}>
-              <Ionicons name="star-outline" size={30} color="#00ADB5" />
-            </Pressable>
-          );
-        } else {
-          return null;
-        }
+        return (
+          <Pressable style={{ paddingEnd: 24 }} onPress={preview}>
+            <Ionicons name="list" size={30} color="#EEEEEE" />
+          </Pressable>
+        );
       },
     });
   }, [exerciseList, userInput]);
 
-  console.log(exerciseList.map((val) => val.id));
+  function refresh() {
+    setIsEdit(false);
+  }
+  // console.log(exerciseList.map((val) => val.id));
 
   // handle form input
   function inputHandler(input) {
@@ -160,24 +156,24 @@ function CustomInputScreen({ route, navigation }) {
     });
   }
 
+  console.log("workoutOrder length: " + workoutOrder.length);
+
   // add exercise too list to be displayed on selected exercise
   function onSelectExercise(exercise) {
     // console.log(exercise.id);
     if (exercise.id === undefined) return;
+    const breakObj = {
+      id: uuid.v4(),
+      name: "Break",
+      isChecked: false,
+    };
+    let exercisesUpdated = exercises;
+    if (exercise.name !== "Break") {
+      exercisesUpdated = exercises.filter((item) => item.id !== exercise.id);
+    }
 
-    const exercisesUpdated = exercises.filter(
-      (item) => item.id !== exercise.id
-    );
     exercisesUpdated.shift();
-
-    setExercises((val) => [
-      {
-        id: new Date().getTime(),
-        name: "Break",
-        isChecked: false,
-      },
-      ...exercisesUpdated,
-    ]);
+    setExercises((val) => [breakObj, ...exercisesUpdated]);
     setExerciseList((prev) => [...prev, exercise]);
   }
 
@@ -216,15 +212,10 @@ function CustomInputScreen({ route, navigation }) {
     let count = 0;
     getWorkoutOrder.map((item) => (count += item.length));
     const totalTime = displayTimeRemaining(count);
-    console.log(getWorkoutOrder.map((e) => e.length));
     setTotalWorkoutTime(totalTime);
+
     setWorkoutOrder((val) => [...getWorkoutOrder]);
     // console.log(workoutOrder);
-  }
-
-  // toggle edit mode
-  function editHandler() {
-    isEdit ? setIsEdit(false) : setIsEdit(true);
   }
 
   // start the workout
@@ -241,70 +232,55 @@ function CustomInputScreen({ route, navigation }) {
     // console.log("start");
   }
 
+  function preview() {
+    if (workoutOrder.length === 0) return;
+    navigation.navigate("preview", { workoutList: workoutOrder });
+  }
+
   function onShowDescription() {
     console.log("show");
   }
 
-  function RenderButtons() {
-    if (!isEdit && workoutOrder.length > 0) {
-      return (
-        <>
-          <EditButton onPress={editHandler} />
-          <MyButton
-            style={styles.button}
-            txtStyle={styles.btnText}
-            text="Start"
-            onPress={startHandler}
-          />
-        </>
-      );
-    } else if (!isEdit && exerciseList.length > 0) {
-      return <EditButton onPress={editHandler} />;
-    }
-  }
-
   return (
-    <View style={isEdit ? styles.editContainer : styles.container}>
-      {!isEdit && (
+    <View style={styles.container}>
+      <NestableScrollContainer contentContainerStyle={{ paddingHorizontal: 8 }}>
         <CustomForm
           inputHandler={inputHandler}
           totalTime={totalWorkoutTime}
           userInput={userInput}
         />
-      )}
 
-      <View style={isEdit && { paddingHorizontal: 8 }}>
-        <DropdownPickers
-          categories={categories}
-          exercises={exercises}
-          onSelectCat={onSelectCategory}
-          onSelectExercise={onSelectExercise}
-        />
-      </View>
+        <View>
+          <DropdownPickers
+            categories={categories}
+            exercises={exercises}
+            onSelectCat={onSelectCategory}
+            onSelectExercise={onSelectExercise}
+          />
+        </View>
 
-      <View style={[{ flex: 1 }, isEdit && { paddingHorizontal: 8 }]}>
-        <DraggableFlatList
-          contentContainerStyle={{ paddingBottom: 150 }}
-          scrollEnabled={true}
-          data={exerciseList}
-          onDragEnd={({ data }) => setExerciseList(data)}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, drag, isActive }) => {
-            const isBreak = item.name === "Break" ? true : false;
-            const breakText =
-              userInput.break === "" ? "" : userInput.break + " sec";
-            return (
-              <ScaleDecorator>
-                <Card style={isBreak ? styles.breakContainer : ""}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View>
-                      <View style={{ flexDirection: "row" }}>
-                        {isEdit && (
+        <View style={{ flex: 1 }}>
+          <NestableDraggableFlatList
+            contentContainerStyle={{ paddingBottom: 150 }}
+            scrollEnabled={true}
+            data={exerciseList}
+            onDragEnd={({ data }) => setExerciseList(data)}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item, drag, isActive }) => {
+              const isBreak = item.name === "Break" ? true : false;
+              const breakText =
+                userInput.break === "" ? "" : userInput.break + " sec";
+              return (
+                <ScaleDecorator>
+                  <Card style={isBreak ? styles.breakContainer : ""}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <View>
+                        <View style={{ flexDirection: "row" }}>
                           <View
                             style={{
                               justifyContent: "center",
@@ -312,7 +288,12 @@ function CustomInputScreen({ route, navigation }) {
                             }}
                           >
                             <Checkbox
-                              style={{ marginEnd: 10, height: 25, width: 25 }}
+                              style={{
+                                marginEnd: 10,
+                                height: 20,
+                                width: 20,
+                                padding: 8,
+                              }}
                               value={item.isChecked}
                               onValueChange={(value) => {
                                 const index = exerciseList.findIndex((obj) => {
@@ -324,31 +305,22 @@ function CustomInputScreen({ route, navigation }) {
                               }}
                             />
                           </View>
-                        )}
-                        <View>
-                          <Text style={isBreak ? styles.breakText : ""}>
-                            {item.name}
-                          </Text>
-                          {userInput.length !== "" && (
+
+                          <View>
                             <Text style={isBreak ? styles.breakText : ""}>
-                              {isBreak
-                                ? breakText
-                                : `${userInput.length} sec x${userInput.sets} `}
+                              {item.name}
                             </Text>
-                          )}
+                            {userInput.length !== "" && (
+                              <Text style={isBreak ? styles.breakText : ""}>
+                                {isBreak
+                                  ? breakText
+                                  : `${userInput.length} sec x${userInput.sets} `}
+                              </Text>
+                            )}
+                          </View>
                         </View>
                       </View>
-                    </View>
-                    {!isEdit && (
-                      <Pressable
-                        onPressIn={onShowDescription}
-                        disabled={isActive}
-                      >
-                        <Ionicons name="chevron-down" size={24} color="black" />
-                      </Pressable>
-                    )}
 
-                    {isEdit && (
                       <Pressable onPressIn={drag} disabled={isActive}>
                         <Ionicons
                           name="reorder-three-outline"
@@ -356,34 +328,35 @@ function CustomInputScreen({ route, navigation }) {
                           color="black"
                         />
                       </Pressable>
-                    )}
-                  </View>
-                </Card>
-              </ScaleDecorator>
-            );
-          }}
-        />
-      </View>
-
-      <RenderButtons />
-
-      {isEdit && (
-        <View
-          style={{
-            backgroundColor: "#393E46",
-            padding: 12,
-            flexDirection: "row",
-            justifyContent: "space-around",
-          }}
-        >
-          <Pressable style={{ marginEnd: 32 }} onPress={deleteChecked}>
-            <Ionicons name="trash-outline" size={36} color="#fe7a7a" />
-          </Pressable>
-          <Pressable onPress={editHandler}>
-            <Ionicons name="close" size={36} color="#EEEEEE" />
-          </Pressable>
+                    </View>
+                  </Card>
+                </ScaleDecorator>
+              );
+            }}
+          />
         </View>
-      )}
+      </NestableScrollContainer>
+      {/* <RenderButtons /> */}
+
+      <View
+        style={{
+          backgroundColor: "#393E46",
+          padding: 12,
+          flexDirection: "row",
+          justifyContent: "space-around",
+        }}
+      >
+        {/* Need to create a save handler to save the workout state */}
+        <Pressable style={{ marginEnd: 32 }} onPress={deleteChecked}>
+          <Ionicons name="save-outline" size={32} color="#EEEEEE" />
+        </Pressable>
+        <Pressable style={{ marginEnd: 32 }} onPress={startHandler}>
+          <Ionicons name="play" size={32} color="#00ADB5" />
+        </Pressable>
+        <Pressable onPress={deleteChecked}>
+          <Ionicons name="trash-outline" size={32} color="#fe7a7a" />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -392,14 +365,10 @@ export default CustomInputScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
-    backgroundColor: "#222831",
-  },
-  editContainer: {
-    flex: 1,
     paddingTop: 8,
     backgroundColor: "#222831",
   },
+
   breakContainer: {
     backgroundColor: "#00ADB5",
   },
