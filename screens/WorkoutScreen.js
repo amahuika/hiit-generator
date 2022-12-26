@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
-// need to uninstall
-import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
-// need to uninstall
-import CountDown from "react-native-countdown-component";
-// need to uninstall
-// import TimerCountdown from "react-native-timer-countdown";
-
 import DisplayExercise from "../components/workoutScreen/DisplayExercise";
 import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
 import CountdownDisplay from "../components/workoutScreen/CountdownDisplay";
