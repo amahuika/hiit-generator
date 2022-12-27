@@ -6,6 +6,7 @@ import { ToastProvider } from "react-native-toast-notifications";
 import MyStack from "./components/navigation/MyStack";
 
 export default function App() {
+  global.__reanimatedWorkletInit = () => {};
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ToastProvider textStyle={{ color: "#EEEEEE" }}>
