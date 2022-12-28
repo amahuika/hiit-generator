@@ -2,7 +2,7 @@
 //// To DO ///////
 
 *Add a new exercise to database on customer workout screen.
-*option to view the full workout. maybe on a new screen? button from footer on edit mode.
+
 
 *add icon for app.
 *fix up styling

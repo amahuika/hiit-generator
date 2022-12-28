@@ -36,10 +36,14 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Name</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.onFocusStyle]}
           value={inputName}
           onChangeText={setInputName}
           onEndEditing={handler}
+          onSubmitEditing={() => {
+            setsRef.current.focus();
+          }}
+          onFocus={() => {}}
         />
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -60,6 +64,9 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onEndEditing={handler}
             ref={setsRef}
             maxLength={2}
+            onSubmitEditing={() => {
+              lengthRef.current.focus();
+            }}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -73,6 +80,9 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onEndEditing={handler}
             ref={lengthRef}
             maxLength={3}
+            onSubmitEditing={() => {
+              restRef.current.focus();
+            }}
           />
         </View>
       </View>
@@ -87,6 +97,9 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onEndEditing={handler}
             ref={restRef}
             maxLength={3}
+            onSubmitEditing={() => {
+              breaksRef.current.focus();
+            }}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
@@ -99,6 +112,9 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             onEndEditing={handler}
             ref={breaksRef}
             maxLength={3}
+            onSubmitEditing={() => {
+              roundsRef.current.focus();
+            }}
           />
         </View>
       </View>

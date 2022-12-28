@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 
 const db = DatabaseConnection.getConnection();
@@ -39,4 +40,80 @@ export function createTable() {
       []
     );
   });
+}
+
+export function saveWorkoutHandler(
+  userInput,
+  totalWorkoutTime,
+  exerciseList,
+  breakId
+) {
+  // userInput, totalWorkoutTime, exerciseList, breakId
+  // console.log("Saved! " + workoutName);
+  // console.log(filtered.map((item) => item.round));
+  // console.log(restLength);
+  // console.log(breakLength);
+
+  if (userInput.name === "" || userInput.name === null) {
+    return;
+  }
+
+  console.log("here");
+
+  const updatedList = exerciseList.map((e, i) => {
+    if (e.name === "Break") {
+      return { ...e, id: breakId };
+    } else {
+      return e;
+    }
+  });
+
+  let lastId;
+
+  db.transaction((tx) => {
+    tx.executeSql(
+      "INSERT INTO saved_workouts (name, length, rest, break, sets, rounds, total_time) VALUES (?,?,?,?,?,?,?)",
+      [
+        userInput.name,
+        userInput.length,
+        userInput.rest,
+        userInput.break,
+        userInput.sets,
+        userInput.rounds,
+        totalWorkoutTime,
+      ],
+      (tx, results) => {
+        console.log("workout id entered " + results.insertId);
+        if (results.insertId > 0) {
+          lastId = results.insertId;
+        }
+      },
+      (tx, error) => {
+        console.log(error.message);
+      }
+    );
+  });
+
+  db.transaction((tx) => {
+    for (const exercise of updatedList) {
+      tx.executeSql(
+        "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
+        [lastId, exercise.id],
+        (tx, results) => {
+          if (results.rowsAffected > 0) {
+          }
+        },
+        (tx, error) => {
+          console.log(error.message);
+        }
+      );
+    }
+  });
+
+  // toast.show("Workout saved successfully!", {
+  //   type: "normal",
+  //   placement: "bottom",
+  //   animationType: "slide-in",
+  //   duration: 3000,
+  // });
 }

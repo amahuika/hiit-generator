@@ -37,6 +37,7 @@ function WorkoutScreen({ route, navigation }) {
   // 10sec rest
   // 45 sec rest
   // repeat * 2
+  console.log(workout);
 
   useEffect(() => {
     navigation.setOptions({

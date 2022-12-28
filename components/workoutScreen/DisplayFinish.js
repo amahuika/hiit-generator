@@ -21,13 +21,15 @@ function DisplayFinish({
   const toast = useToast();
 
   // create a list to be saved to db if it is not null
-  exercises.shift();
+
   let updatedList;
   const getBreakId = exercises.find((item) => item.name === "Break");
-  // console.log(exercises.map((e) => e.id));
+  // console.log("Break" + getBreakId.id);
+  // console.log(exercises.map((e) => e.name));
+
   if (workoutListForDb !== null) {
     updatedList = workoutListForDb.map((item) => {
-      if (item.name === "Break" && getBreakId.id !== undefined) {
+      if (item.name === "Break" && getBreakId !== undefined) {
         return {
           name: "Break",
           id: getBreakId.id,
@@ -49,6 +51,10 @@ function DisplayFinish({
     // console.log(filtered.map((item) => item.round));
     // console.log(restLength);
     // console.log(breakLength);
+    if (workoutInfo.name === "" || workoutInfo.name === null) {
+      modalHandler();
+      return;
+    }
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -87,9 +93,6 @@ function DisplayFinish({
       }
     });
 
-    if (workoutInfo.name === "") {
-      modalHandler();
-    }
     setIsSaved(true);
     toast.show("Workout saved successfully!", {
       type: "normal",
@@ -123,7 +126,7 @@ function DisplayFinish({
             txtStyle={styles.buttonText}
             onPress={() => {
               if (!isSaved) {
-                if (workoutInfo.name !== null) {
+                if (workoutInfo.name !== null || workoutInfo.name !== "") {
                   saveWorkoutHandler(workoutInfo.name);
                 } else {
                   modalHandler();

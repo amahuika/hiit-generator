@@ -138,7 +138,7 @@ function AddNewExerciseModal({
           </View>
 
           {/* //Buttons */}
-          <RowSpaceBetween>
+          <RowSpaceBetween style={{ marginTop: 8 }}>
             <View style={styles.btnWidth}>
               <MyButton onPress={onAdd} text={isEdit ? "Update" : "Add"} />
             </View>
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   inputContainer: {
-    marginVertical: 4,
+    marginVertical: 8,
   },
   input: {
     fontSize: 16,
@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderRadius: 4,
     paddingStart: 4,
+    backgroundColor: "#e6dddd",
   },
   btnWidth: {
     width: "45%",
