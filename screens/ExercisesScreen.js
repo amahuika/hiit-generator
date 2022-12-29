@@ -294,6 +294,7 @@ function ExercisesScreen({ navigation, route }) {
         isOpen={isModalOpen}
         toggleModal={toggleModal}
         onAddExercise={addNewExercise}
+        category_Id={categoryId}
       />
     </View>
   );

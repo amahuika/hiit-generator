@@ -13,10 +13,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import CategoryScreen from "../../screens/CategoryScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import PreviewScreen from "../../screens/PreviewScreen";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
+const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// tabs
 function MyTabs() {
   return (
     <Tab.Navigator

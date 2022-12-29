@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-function FloatingButton({ onPress, Ionicon }) {
+function FloatingButton({ onPress, Ionicon, style }) {
   return (
     <Pressable
       android_ripple={{ color: "#EEEEEE", foreground: true }}
-      style={styles.button}
+      style={[styles.button, style]}
       onPress={() => onPress()}
     >
       <Ionicons name={Ionicon} size={36} color="#EEEEEE" />

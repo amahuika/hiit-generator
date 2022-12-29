@@ -13,6 +13,7 @@ function AddNewExerciseModal({
   onAddExercise,
   isEdit,
   editExercise,
+  category_Id,
 }) {
   const [onFocusStyle, setOnFocusStyle] = useState({
     backgroundColor: "#EEEEEE",
@@ -43,14 +44,11 @@ function AddNewExerciseModal({
       resetInput();
     }
   }
+  console.log("cat " + category_Id);
 
   function renderDefaultCategory() {
-    if (isEdit) {
-      const index = categories
-        .map((item) => item.value)
-        .indexOf(editExercise.category_id);
-      return index;
-    }
+    const index = categories.map((item) => item.value).indexOf(category_Id);
+    return index;
   }
 
   function resetInput() {
