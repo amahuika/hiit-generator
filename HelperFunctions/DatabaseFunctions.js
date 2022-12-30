@@ -58,8 +58,6 @@ export function saveWorkoutHandler(
     return;
   }
 
-  console.log("here");
-
   const updatedList = exerciseList.map((e, i) => {
     if (e.name === "Break") {
       return { ...e, id: breakId };
@@ -101,6 +99,7 @@ export function saveWorkoutHandler(
         [lastId, exercise.id],
         (tx, results) => {
           if (results.rowsAffected > 0) {
+            console.log("success");
           }
         },
         (tx, error) => {
@@ -109,11 +108,4 @@ export function saveWorkoutHandler(
       );
     }
   });
-
-  // toast.show("Workout saved successfully!", {
-  //   type: "normal",
-  //   placement: "bottom",
-  //   animationType: "slide-in",
-  //   duration: 3000,
-  // });
 }

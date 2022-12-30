@@ -100,28 +100,42 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
   if (userInput.length === "" || exerciseList.length === 0) {
     return;
   }
+
+  // console.log("break:" + userInput.break.trim());
+
   const numOfSets = parseInt(userInput.sets);
   const numOfRounds = parseInt(userInput.rounds);
-  const breakLength = userInput.break === "" ? 0 : parseInt(userInput.break);
-  const restLength = userInput.rest === "" ? 0 : parseInt(userInput.rest);
+  const breakLength =
+    userInput.break.trim() === "" ? 0 : parseInt(userInput.break);
+  const restLength =
+    userInput.rest.trim() === "" ? 0 : parseInt(userInput.rest);
   const exerciseLength = parseInt(userInput.length);
   const breakObj = { name: "Break", id: breakId, length: breakLength };
-
+  // console.log(breakLength);
   let workoutOrderArray = [];
   const exercisesArray = exerciseList;
-  const updatedArray = exercisesArray.map((item) => {
-    if (item.name === "Break") {
-      return breakObj;
-    } else {
-      return {
-        name: item.name,
-        description: item.description,
-        id: item.id,
-        length: exerciseLength,
-      };
-    }
-  });
 
+  // filter out breaks if break is 0
+  const updatedArray = exercisesArray
+    .filter((e) => {
+      if (e.name === "Break" && breakLength === 0) {
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .map((item) => {
+      if (item.name === "Break") {
+        return breakObj;
+      } else {
+        return {
+          ...item,
+          length: exerciseLength,
+        };
+      }
+    });
+
+  // add in the rests and remove the last rest if there is a break there
   for (const exercise of updatedArray) {
     if (exercise.name !== "Break") {
       for (let i = 0; i < numOfSets; i++) {
@@ -139,7 +153,7 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
   if (restLength === 0)
     workoutOrderArray = workoutOrderArray.filter((i) => i.name !== "Rest");
   // console.log(workoutOrderArray.map((e) => e.name));
-  // repeat rounds based on user input
+  // repeat rounds based on user input will always be 1
   // remove last element if break or rest
 
   const updateWorkoutOrder =
@@ -157,9 +171,9 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
     addRepeatRound.length >= 2
       ? checkLastForBreakOrRest(addRepeatRound)
       : addRepeatRound;
-  console.log(
-    "Generate custom workout length: " + finalUpdatedWorkoutOrder.length
-  );
+  // console.log(
+  //   "Generate custom workout length: " + finalUpdatedWorkoutOrder.length
+  // );
 
   return finalUpdatedWorkoutOrder;
 }

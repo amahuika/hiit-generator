@@ -1,5 +1,5 @@
 import { View, Text, TextInput, StyleSheet } from "react-native";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import Card from "../Card";
 
@@ -10,12 +10,24 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
   const [inputRest, setInputRest] = useState(userInput.rest);
   const [inputBreak, setInputBreak] = useState(userInput.break);
   const [inputRounds, setInputRounds] = useState(userInput.rounds);
+  const [isFocused, setIsFocused] = useState({
+    name: false,
+    sets: false,
+    length: false,
+    rest: false,
+    break: false,
+    rounds: false,
+  });
+  const [focusStyle, setFocusStyle] = useState({
+    borderColor: "#00ADB5",
+    borderBottomWidth: 2,
+  });
 
-  const setsRef = useRef();
-  const lengthRef = useRef();
-  const restRef = useRef();
-  const breaksRef = useRef();
-  const roundsRef = useRef();
+  // const setsRef = useRef();
+  // const lengthRef = useRef();
+  // const restRef = useRef();
+  // const breaksRef = useRef();
+  // const roundsRef = useRef();
 
   function handler() {
     const inputs = {
@@ -36,21 +48,19 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Name</Text>
         <TextInput
-          style={[styles.input, styles.onFocusStyle]}
+          style={[styles.input, isFocused.name && focusStyle]}
           value={inputName}
           onChangeText={setInputName}
           onEndEditing={handler}
-          onSubmitEditing={() => {
-            setsRef.current.focus();
-          }}
-          onFocus={() => {}}
+          onFocus={() => setIsFocused((val) => ({ ...val, name: true }))}
+          onBlur={() => setIsFocused((val) => ({ ...val, name: false }))}
         />
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={[styles.inputContainer, { width: "45%" }]}>
           <Text style={styles.inputLabel}>Number of sets</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isFocused.sets && focusStyle]}
             value={inputSets}
             onChangeText={(text) => {
               if (text < 1 || text.includes("-")) {
@@ -62,27 +72,23 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             placeholder="Eg 3"
             keyboardType="number-pad"
             onEndEditing={handler}
-            ref={setsRef}
             maxLength={2}
-            onSubmitEditing={() => {
-              lengthRef.current.focus();
-            }}
+            onFocus={() => setIsFocused((val) => ({ ...val, sets: true }))}
+            onBlur={() => setIsFocused((val) => ({ ...val, sets: false }))}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
           <Text style={styles.inputLabel}>Length of exercise (sec)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isFocused.length && focusStyle]}
             value={inputLength}
             onChangeText={setInputLength}
             placeholder="25"
             keyboardType="number-pad"
             onEndEditing={handler}
-            ref={lengthRef}
             maxLength={3}
-            onSubmitEditing={() => {
-              restRef.current.focus();
-            }}
+            onFocus={() => setIsFocused((val) => ({ ...val, length: true }))}
+            onBlur={() => setIsFocused((val) => ({ ...val, length: false }))}
           />
         </View>
       </View>
@@ -90,31 +96,27 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
         <View style={[styles.inputContainer, { width: "45%" }]}>
           <Text style={styles.inputLabel}>Rest between exercises (sec)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isFocused.rest && focusStyle]}
             value={inputRest}
             onChangeText={setInputRest}
             keyboardType="number-pad"
             onEndEditing={handler}
-            ref={restRef}
             maxLength={3}
-            onSubmitEditing={() => {
-              breaksRef.current.focus();
-            }}
+            onFocus={() => setIsFocused((val) => ({ ...val, rest: true }))}
+            onBlur={() => setIsFocused((val) => ({ ...val, rest: false }))}
           />
         </View>
         <View style={[styles.inputContainer, { width: "45%" }]}>
           <Text style={styles.inputLabel}>Breaks (sec)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isFocused.break && focusStyle]}
             value={inputBreak}
             onChangeText={setInputBreak}
             keyboardType="number-pad"
             onEndEditing={handler}
-            ref={breaksRef}
             maxLength={3}
-            onSubmitEditing={() => {
-              roundsRef.current.focus();
-            }}
+            onFocus={() => setIsFocused((val) => ({ ...val, break: true }))}
+            onBlur={() => setIsFocused((val) => ({ ...val, break: false }))}
           />
         </View>
       </View>
@@ -122,7 +124,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
         <View style={[styles.inputContainer, { width: "45%" }]}>
           <Text style={styles.inputLabel}>Rounds</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isFocused.rounds && focusStyle]}
             value={inputRounds}
             onChangeText={(text) => {
               if (text < 1 || text.includes("-")) {
@@ -133,8 +135,9 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
             }}
             keyboardType="number-pad"
             onEndEditing={handler}
-            ref={roundsRef}
             maxLength={2}
+            onFocus={() => setIsFocused((val) => ({ ...val, rounds: true }))}
+            onBlur={() => setIsFocused((val) => ({ ...val, rounds: false }))}
           />
         </View>
         <View
@@ -160,11 +163,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   input: {
-    fontSize: 14,
+    fontSize: 16,
     borderColor: "black",
-    color: "#5a5b5e",
+    color: "#017a81",
     borderBottomWidth: 0.5,
-    borderRadius: 4,
   },
   totalTimeText: {
     fontSize: 16,

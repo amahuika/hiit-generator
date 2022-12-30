@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Pressable } from "react-native";
+import { View, StyleSheet, Text, Pressable, Keyboard } from "react-native";
 import Card from "../components/Card";
 import { Ionicons } from "@expo/vector-icons";
 import CustomForm from "../components/inputWorkoutScreen/CustomForm";
@@ -21,6 +21,7 @@ import { saveWorkoutHandler } from "../HelperFunctions/DatabaseFunctions";
 import { useToast } from "react-native-toast-notifications";
 import HideWithKeyboard from "react-native-hide-with-keyboard";
 import FloatingButton from "../components/FloatingButton";
+import AddNewExerciseModal from "../components/AddNewExerciseModal";
 
 const db = DatabaseConnection.getConnection();
 
@@ -31,6 +32,9 @@ function CustomInputScreen({ route, navigation }) {
   const [totalWorkoutTime, setTotalWorkoutTime] = useState("00:00");
   const [exercisesFromDb, setExercisesFromDb] = useState([]);
   const [breakId, setBreakId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [categoryId, setCategoryId] = useState(null);
   const [exercises, setExercises] = useState([
     { name: "No category selected" },
   ]);
@@ -43,7 +47,7 @@ function CustomInputScreen({ route, navigation }) {
     rounds: "1",
   });
 
-  const tost = useToast();
+  const toast = useToast();
 
   useEffect(() => {
     // get the break id from db
@@ -103,7 +107,7 @@ function CustomInputScreen({ route, navigation }) {
   // select category populate exercise list based on selected category
   function onSelectCategory(categoryId) {
     // console.log(categoryId);
-
+    setCategoryId(categoryId);
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM exercises WHERE category_id = ?",
@@ -236,15 +240,66 @@ function CustomInputScreen({ route, navigation }) {
     });
   }
 
+  // on save workout
   function onSave() {
     if (userInput.name === "" || userInput.name === null) return;
     if (exerciseList.length > 0) {
-      saveWorkoutHandler(userInput, totalWorkoutTime, exerciseList, breakId);
+      // saveWorkoutHandler(userInput, totalWorkoutTime, exerciseList, breakId);
 
-      tost.show("Workout saved successfully", {
-        type: "success",
-        duration: 4000,
-        placement: "bottom",
+      const updatedList = exerciseList.map((e, i) => {
+        if (e.name === "Break") {
+          return { ...e, id: breakId };
+        } else {
+          return e;
+        }
+      });
+
+      let lastId;
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          "INSERT INTO saved_workouts (name, length, rest, break, sets, rounds, total_time) VALUES (?,?,?,?,?,?,?)",
+          [
+            userInput.name,
+            userInput.length,
+            userInput.rest,
+            userInput.break,
+            userInput.sets,
+            userInput.rounds,
+            totalWorkoutTime,
+          ],
+          (tx, results) => {
+            console.log("workout id entered " + results.insertId);
+            if (results.insertId > 0) {
+              lastId = results.insertId;
+
+              for (const exercise of updatedList) {
+                tx.executeSql(
+                  "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
+                  [lastId, exercise.id],
+                  (tx, results) => {
+                    if (results.rowsAffected > 0) {
+                    }
+                  },
+                  (tx, error) => {
+                    console.log(error.message);
+                  }
+                );
+              }
+
+              if (lastId > 0) {
+                toast.show("Workout saved successfully", {
+                  duration: 3000,
+                  type: "success",
+                  placement: "bottom",
+                });
+              }
+            }
+          },
+          (tx, error) => {
+            console.log(error.message);
+          }
+        );
       });
     }
   }
@@ -261,8 +316,35 @@ function CustomInputScreen({ route, navigation }) {
     });
   }
 
-  function addHandle() {
-    console.log("Add");
+  function addHandle(name, catId, description) {
+    // console.log("Add name: " + name);
+    // console.log("Add catId: " + catId);
+    // console.log("Add desc: " + description);
+
+    db.transaction((tx) => [
+      tx.executeSql(
+        "INSERT INTO exercises (name, category_id, description) VALUES (?,?,?)",
+        [name, catId, description],
+        (tx, results) => {
+          if (results.rowsAffected > 0) {
+            toast.show("Exercises added successfully", {
+              type: "success",
+              duration: 4000,
+              placement: "bottom",
+            });
+          }
+        },
+        (tx, error) => {
+          console.log(error.message);
+        }
+      ),
+    ]);
+
+    toggleModal();
+  }
+
+  function toggleModal() {
+    isModalOpen ? setIsModalOpen(false) : setIsModalOpen(true);
   }
 
   return (
@@ -361,18 +443,7 @@ function CustomInputScreen({ route, navigation }) {
           <Pressable style={{ marginEnd: 32 }} onPress={startHandler}>
             <Ionicons name="play" size={32} color="#00ADB5" />
           </Pressable>
-          <Pressable
-            onPress={addHandle}
-            style={{
-              backgroundColor: "#00ADB5",
-              padding: 4,
-              borderRadius: 50,
-              justifyContent: "center",
-              alignItems: "center",
-              height: 40,
-              width: 40,
-            }}
-          >
+          <Pressable onPress={toggleModal}>
             <Ionicons name="add" size={32} color="#EEEEEE" />
           </Pressable>
 
@@ -381,21 +452,18 @@ function CustomInputScreen({ route, navigation }) {
           </Pressable>
         </View>
       </HideWithKeyboard>
-      {/* <FloatingButton
-        Ionicon={"add"}
-        style={{ bottom: 80, borderColor: "white", borderWidth: 1 }}
-        onPress={addHandle}
-      /> */}
+
       {/* Need to create props for the add modal & add a button to add a new exercise */}
-      {/* <AddNewExerciseModal
-        isEdit={isEdit}
-        editExercise={editExercise}
+
+      <AddNewExerciseModal
+        isEdit={false}
+        editExercise={null}
         categories={categories}
         isOpen={isModalOpen}
         toggleModal={toggleModal}
-        onAddExercise={addNewExercise}
+        onAddExercise={addHandle}
         category_Id={categoryId}
-      /> */}
+      />
     </View>
   );
 }

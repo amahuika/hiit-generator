@@ -16,13 +16,19 @@ function AddNewExerciseModal({
   category_Id,
 }) {
   const [onFocusStyle, setOnFocusStyle] = useState({
+    borderColor: "#00ADB5",
+    borderBottomWidth: 2,
+    color: "#017a81",
     backgroundColor: "#EEEEEE",
-    borderColor: "black",
   });
   const [categoryId, setCategoryId] = useState();
   const [name, setName] = useState();
   const [description, setDescription] = useState();
   const [isValid, setIsValid] = useState(true);
+  const [isFocused, setIsFocused] = useState({
+    name: false,
+    description: false,
+  });
   const [errorMessage, setErrorMessage] = useState("");
 
   function onAdd() {
@@ -44,7 +50,7 @@ function AddNewExerciseModal({
       resetInput();
     }
   }
-  console.log("cat " + category_Id);
+  // console.log("cat " + category_Id);
 
   function renderDefaultCategory() {
     const index = categories.map((item) => item.value).indexOf(category_Id);
@@ -55,9 +61,13 @@ function AddNewExerciseModal({
     setName();
     setDescription();
     setCategoryId();
+    setIsFocused((val) => ({ name: false, description: false }));
   }
 
   function isEditValues() {
+    if (category_Id !== undefined) {
+      setCategoryId(category_Id);
+    }
     if (isEdit) {
       setName(editExercise.name);
       setDescription(editExercise.description);
@@ -74,7 +84,9 @@ function AddNewExerciseModal({
           resetInput();
           toggleModal("close");
         }}
-        onShow={() => isEditValues()}
+        onShow={() => {
+          isEditValues();
+        }}
       >
         <View style={styles.innerModalView}>
           <Text style={{ fontSize: 20 }}>
@@ -85,23 +97,14 @@ function AddNewExerciseModal({
             <Text>Name</Text>
             <TextInput
               value={name}
-              style={[styles.input, onFocusStyle]}
+              style={[styles.input, isFocused.name && onFocusStyle]}
               onChangeText={(text) => {
                 setIsValid(true);
                 setName(text);
               }}
-              onFocus={() =>
-                setOnFocusStyle({
-                  backgroundColor: "#e6dddd",
-                  borderColor: "#00ADB5",
-                })
-              }
-              onBlur={() =>
-                setOnFocusStyle({
-                  backgroundColor: "#EEEEEE",
-                  borderColor: "black",
-                })
-              }
+              onFocus={() => setIsFocused((val) => ({ ...val, name: true }))}
+              onBlur={() => setIsFocused((val) => ({ ...val, name: false }))}
+              autoFocus={true}
             />
           </View>
           <View style={styles.inputContainer}>
@@ -129,9 +132,15 @@ function AddNewExerciseModal({
             <Text>Description</Text>
             <TextInput
               value={description}
-              style={styles.input}
+              style={[styles.input, isFocused.description && onFocusStyle]}
               multiline={true}
               onChangeText={setDescription}
+              onFocus={() =>
+                setIsFocused((val) => ({ ...val, description: true }))
+              }
+              onBlur={() =>
+                setIsFocused((val) => ({ ...val, description: false }))
+              }
             />
           </View>
 
@@ -171,9 +180,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#5a5b5e",
     borderBottomWidth: 0.5,
-    borderRadius: 4,
+    borderColor: "black",
+
     paddingStart: 4,
-    backgroundColor: "#e6dddd",
+    backgroundColor: "#EEEEEE",
   },
   btnWidth: {
     width: "45%",

@@ -35,9 +35,9 @@ function ExercisesScreen({ navigation, route }) {
   // setting up toast notifications
   const toaster = useToast();
   const toast = {
-    showToast: (text) =>
+    showToast: (text, type) =>
       toaster.show(text, {
-        type: "success",
+        type: type,
         placement: "bottom",
         animationType: "slide-in",
         duration: 4000,
@@ -123,15 +123,19 @@ function ExercisesScreen({ navigation, route }) {
         (tx, results) => {
           if (results.rowsAffected === 1) {
             RefreshExerciseList();
+            toast.showToast("Exercise deleted successfully!", "success");
           }
         },
         (tx, error) => {
-          console.log(error.messages);
+          console.log(error.message);
+          console.log("error");
+          toast.showToast(
+            "Cannot delete exercise that is saved in a workout",
+            "normal"
+          );
         }
       );
     });
-
-    toast.showToast("Exercise deleted successfully!");
   }
 
   function onEdit(id) {
@@ -165,7 +169,7 @@ function ExercisesScreen({ navigation, route }) {
           }
         );
       });
-      toast.showToast("Exercise updated successfully!");
+      toast.showToast("Exercise updated successfully!", "success");
     } else {
       db.transaction((tx) => {
         tx.executeSql(
@@ -176,7 +180,7 @@ function ExercisesScreen({ navigation, route }) {
           }
         );
       });
-      toast.showToast("Exercise Added successfully!");
+      toast.showToast("Exercise Added successfully!", "success");
     }
 
     toggleModal("close");
