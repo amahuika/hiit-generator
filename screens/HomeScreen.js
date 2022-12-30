@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createTable, dropTables } from "../HelperFunctions/DatabaseFunctions";
 
 import { updatedExercises } from "../assets/exerciseData/ExerciseData";
+import { Audio } from "expo-av";
 
 // Upper Body = 1
 // Lower Body = 2

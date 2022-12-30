@@ -6,6 +6,7 @@ import { displayTimeRemaining } from "../HelperFunctions/HelperFunctions";
 import CountdownDisplay from "../components/workoutScreen/CountdownDisplay";
 import DisplayFinish from "../components/workoutScreen/DisplayFinish";
 import Footer from "../components/workoutScreen/Footer";
+import { Audio } from "expo-av";
 
 // const shortBeep = new Audio("../assets/sounds/short-beep-tone-47916.mp3");
 
@@ -17,6 +18,8 @@ function WorkoutScreen({ route, navigation }) {
   const [hasPaused, setHasPaused] = useState(false);
   const [totalTime, setTotalTime] = useState();
   const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
+  const [sound, setSound] = useState();
+
   const [currentExercise, setCurrentExercise] = useState({
     name: "",
     length: 0,
@@ -37,7 +40,7 @@ function WorkoutScreen({ route, navigation }) {
   // 10sec rest
   // 45 sec rest
   // repeat * 2
-  console.log(workout);
+  // console.log(workout);
 
   useEffect(() => {
     navigation.setOptions({
@@ -65,8 +68,13 @@ function WorkoutScreen({ route, navigation }) {
         setTotalTime(displayTimeRemaining(updatedTotal));
 
         setTimer(timer - 1);
-      }, 750);
-
+      }, 900);
+      if (timer <= 4 && timer > 1) {
+        playBeep();
+      }
+      if (timer === 1) {
+        playLongBeep();
+      }
       if (timer < 1) {
         clearTimeout(countdown);
         if (workoutList.length === 0) {
@@ -104,6 +112,21 @@ function WorkoutScreen({ route, navigation }) {
       clearInterval(countdown);
     };
   }, [timer, hasPaused, hasStarted]);
+
+  async function playBeep() {
+    const { sound } = await Audio.Sound.createAsync(
+      require(`../assets/sounds/shortBeep.mp3`)
+    );
+    // setSound(sound);
+    await sound.playAsync();
+  }
+  async function playLongBeep() {
+    const { sound } = await Audio.Sound.createAsync(
+      require(`../assets/sounds/longBeep.mp3`)
+    );
+    // setSound(sound);
+    await sound.playAsync();
+  }
 
   // console.log("time " + workoutTotalTime);
   function onPause() {

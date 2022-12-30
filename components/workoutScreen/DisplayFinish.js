@@ -51,7 +51,7 @@ function DisplayFinish({
     // console.log(filtered.map((item) => item.round));
     // console.log(restLength);
     // console.log(breakLength);
-    if (workoutInfo.name === "" || workoutInfo.name === null) {
+    if (workoutName === "" || workoutName === null) {
       modalHandler();
       return;
     }
@@ -72,34 +72,38 @@ function DisplayFinish({
           console.log("workout id entered " + results.insertId);
           if (results.insertId > 0) {
             lastId = results.insertId;
+            for (const exercise of updatedList) {
+              tx.executeSql(
+                "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
+                [lastId, exercise.id],
+                null,
+                (tx, error) => {
+                  console.log(error.message);
+                }
+              );
+            }
+            setIsSaved(true);
+            toast.show("Workout saved successfully!", {
+              type: "success",
+              placement: "bottom",
+              animationType: "slide-in",
+              duration: 3000,
+            });
           }
         },
         (tx, error) => {
           console.log(error.message);
+          toast.show("Something went wrong", {
+            type: "danger",
+            placement: "bottom",
+            animationType: "slide-in",
+            duration: 3000,
+          });
         }
       );
     });
 
-    db.transaction((tx) => {
-      for (const exercise of updatedList) {
-        tx.executeSql(
-          "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
-          [lastId, exercise.id],
-          null,
-          (tx, error) => {
-            console.log(error.message);
-          }
-        );
-      }
-    });
-
-    setIsSaved(true);
-    toast.show("Workout saved successfully!", {
-      type: "normal",
-      placement: "bottom",
-      animationType: "slide-in",
-      duration: 3000,
-    });
+    if (showModal) modalHandler();
   }
 
   function backHandler() {
@@ -127,6 +131,7 @@ function DisplayFinish({
             onPress={() => {
               if (!isSaved) {
                 if (workoutInfo.name !== null || workoutInfo.name !== "") {
+                  console.log(workoutInfo.name);
                   saveWorkoutHandler(workoutInfo.name);
                 } else {
                   modalHandler();
