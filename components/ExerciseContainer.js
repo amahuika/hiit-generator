@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import Card from "./Card";
 
 const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
   const [showDescription, setShowDescription] = useState(false);
@@ -13,7 +14,7 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
     onRefresh(exercise, index);
   }
   return (
-    <View style={styles.showExerciseList}>
+    <Card>
       <View style={showDescription && styles.exerciseTextContainer}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={styles.myTextExercise}>{exercise.name}</Text>
@@ -52,10 +53,10 @@ const Exercises = ({ exercise, onRefresh, index, fromSaved }) => {
       {showDescription && (
         <View>
           <Text style={styles.myText}>Description</Text>
-          <Text style={styles.myText}>{exercise.description}</Text>
+          <Text>{exercise.description}</Text>
         </View>
       )}
-    </View>
+    </Card>
   );
 };
 
@@ -67,7 +68,7 @@ function ExerciseContainer({ workoutList, onRefresh, fromSaved }) {
           return (
             <View key={item.id} style={styles.roundContainer}>
               <Text style={styles.roundText}>{item.name}</Text>
-              <Text style={styles.roundText}>{item.length} sec</Text>
+              <Text style={styles.roundLength}>{item.length} sec</Text>
             </View>
           );
         } else {
@@ -88,13 +89,6 @@ function ExerciseContainer({ workoutList, onRefresh, fromSaved }) {
 export default ExerciseContainer;
 
 const styles = StyleSheet.create({
-  showExerciseList: {
-    backgroundColor: "#EEEEEE",
-    borderRadius: 4,
-    padding: 8,
-    marginVertical: 8,
-    elevation: 4,
-  },
   roundContainer: {
     backgroundColor: "#00ADB5",
     borderRadius: 4,
@@ -105,25 +99,24 @@ const styles = StyleSheet.create({
 
   myText: {
     // color: "#EEEEEE",
-    color: "#393E46",
+    fontSize: 16,
   },
   exerciseTextContainer: {
     marginBottom: 12,
   },
   myTextExercise: {
-    fontSize: 20,
+    fontSize: 16,
     // color: "#EEEEEE",
-    color: "#393E46",
+
     marginRight: 14,
   },
-  myTextLength: {
-    // color: "#EEEEEE",
-    color: "#393E46",
+  roundLength: {
+    color: "#EEEEEE",
+    // color: "#393E46",
   },
   roundText: {
     color: "#EEEEEE",
-    // color: "#393E46",
-    fontSize: 20,
-    // fontWeight: "bold",
+
+    fontSize: 16,
   },
 });

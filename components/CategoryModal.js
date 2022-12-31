@@ -4,23 +4,18 @@ import RowSpaceBetween from "./RowSpaceBetween";
 import Modal from "react-native-modal";
 import { useState } from "react";
 
-const focus = {
-  backgroundColor: "#e6dddd",
-  borderColor: "#00ADB5",
-};
-
-const blur = {
-  backgroundColor: "#EEEEEE",
-  borderColor: "black",
-};
-
 function CategoryModal({ isOpen, toggleModal, onAdd, catForEdit }) {
   const [input, setInput] = useState();
   const [isFocused, setIsFocused] = useState(false);
   const [isValid, setIsValid] = useState(true);
+  const [focusStyle, setFocusStyle] = useState({
+    borderColor: "#00ADB5",
+    borderBottomWidth: 2,
+  });
 
   function closeModal() {
     setInput();
+    setIsFocused(false);
     setIsValid(true);
   }
 
@@ -28,8 +23,8 @@ function CategoryModal({ isOpen, toggleModal, onAdd, catForEdit }) {
     if (input === undefined || input === "") {
       setIsValid(false);
     } else {
-      onAdd(input);
       closeModal();
+      onAdd(input);
     }
   }
 
@@ -43,14 +38,19 @@ function CategoryModal({ isOpen, toggleModal, onAdd, catForEdit }) {
       <Modal
         isVisible={isOpen}
         onModalShow={checkIfEdit}
-        onBackdropPress={() => toggleModal("close")}
+        onBackdropPress={() => {
+          closeModal();
+          toggleModal("close");
+        }}
       >
         <View style={styles.innerModalContainer}>
           <View style={styles.inputContainer}>
-            <Text style={{ fontSize: 20 }}>Add new Category</Text>
+            <Text style={{ fontSize: 20 }}>
+              {catForEdit !== null ? "Edit" : "Add new"} Category
+            </Text>
             <TextInput
               value={input}
-              style={[styles.input, isFocused ? focus : blur]}
+              style={[styles.input, isFocused && focusStyle]}
               onChangeText={(text) => {
                 setIsValid(true);
                 setInput(text);
@@ -95,10 +95,8 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 16,
-    color: "#5a5b5e",
+    color: "#252424",
     borderBottomWidth: 0.5,
-    borderRadius: 4,
-    paddingStart: 4,
   },
   btnWidth: {
     width: "45%",

@@ -45,7 +45,7 @@ function CategoryScreen({ navigation }) {
             style={{ marginLeft: 16, marginRight: 16 }}
             onPress={() => navigation.navigate("home")}
           >
-            <Ionicons name="home-outline" size={24} color="#EEEEEE" />
+            <Ionicons name="arrow-back" size={24} color="#EEEEEE" />
           </Pressable>
         );
       },

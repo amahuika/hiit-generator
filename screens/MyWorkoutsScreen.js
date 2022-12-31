@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
@@ -62,32 +69,34 @@ function MyWorkoutsScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {myWorkoutList.map((item) => {
-        return (
-          <View key={item.id}>
-            <Pressable
-              onPress={() => {
-                onViewWorkout(item);
-              }}
-              android_ripple={{ color: "#fefefe" }}
-              style={styles.workoutButton}
-            >
-              <View>
-                <Text style={styles.workoutTitle}>{item.name}</Text>
-                <Text style={styles.totalTime}>
-                  Length: {item.total_time} mins
-                </Text>
-              </View>
+      <ScrollView>
+        {myWorkoutList.map((item) => {
+          return (
+            <View key={item.id}>
               <Pressable
-                style={styles.deleteButton}
-                onPress={() => onDeleteWorkout(item.id)}
+                onPress={() => {
+                  onViewWorkout(item);
+                }}
+                android_ripple={{ color: "#fefefe" }}
+                style={styles.workoutButton}
               >
-                <Ionicons name="trash-outline" size={30} color="#fe7a7a" />
+                <View>
+                  <Text style={styles.workoutTitle}>{item.name}</Text>
+                  <Text style={styles.totalTime}>
+                    Length: {item.total_time} mins
+                  </Text>
+                </View>
+                <Pressable
+                  style={styles.deleteButton}
+                  onPress={() => onDeleteWorkout(item.id)}
+                >
+                  <Ionicons name="trash-outline" size={30} color="#fe7a7a" />
+                </Pressable>
               </Pressable>
-            </Pressable>
-          </View>
-        );
-      })}
+            </View>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }

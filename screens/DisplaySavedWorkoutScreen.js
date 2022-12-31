@@ -30,12 +30,11 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
   const [workoutOrder, setWorkoutOrder] = useState([]);
   const [totalTime, setTotalTime] = useState("");
   const [breakId, setBreakId] = useState();
-  const [refresh, setRefresh] = useState(-1);
-  const [isLoading, setIsLoading] = useState(true);
 
   const workoutDetails = route.params.workout;
 
   useEffect(() => {
+    navigation.setOptions({ title: workoutDetails.name });
     if (workoutList.length === 0) {
       db.transaction((tx) => {
         tx.executeSql(
@@ -66,12 +65,8 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
       });
     }
 
-    // if (refresh >= workoutOrder.length) {
-    //   setIsLoading(false);
-    // }
-
     if (workoutList.length > 0) {
-      // check if rounds is null id it is then this is a random workout
+      // check if rounds is null if it is then this is a random workout
       if (workoutDetails.rounds === "") {
         MyRandomWorkoutOrder();
       } else {
@@ -91,17 +86,6 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
         // setRefresh((val) => val + 1);
       }
     }
-
-    navigation.setOptions({
-      title: workoutDetails.name,
-      headerRight: () => {
-        return (
-          <Pressable style={{ paddingEnd: 24 }} onPress={navigateToPreview}>
-            <Ionicons name="list" size={30} color="#EEEEEE" />
-          </Pressable>
-        );
-      },
-    });
   }, [workoutList]);
 
   function navigateToPreview() {
@@ -136,9 +120,27 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
     setTotalTime(displayTimeRemaining(totalInSeconds));
   }
 
+  function editHandler() {
+    console.log("edit");
+
+    // need to pass relevant data for editing to the custom form page, details, display list, full workout, and maybe a boolean isEdit? maybe
+
+    // all details for form
+    console.log(workoutDetails);
+
+    // list for display
+    console.log(workoutList.length);
+
+    // full workout order
+    console.log(workoutOrder.length);
+    // navigation.navigate("customInput");
+  }
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 8 }}
+      >
         <Card style={{ paddingTop: 16 }}>
           <RowSpaceBetween>
             <View style={styles.inputContainer}>
@@ -183,22 +185,18 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
           </RowSpaceBetween>
         </Card>
         <ExerciseContainer workoutList={workoutList} fromSaved={true} />
-        {/* {isLoading && (
-          <View style={styles.loadingContainer}>
-            <Card style={styles.innerLoadingContainer}>
-              <ActivityIndicator size={"large"} />
-              <Text>Loading...</Text>
-            </Card>
-          </View>
-        )} */}
       </ScrollView>
-      <View>
-        <MyButton
-          style={styles.button}
-          txtStyle={styles.btnText}
-          text="Start"
-          onPress={startHandler}
-        />
+
+      <View style={styles.footer}>
+        <Pressable onPress={navigateToPreview}>
+          <Ionicons name="list" size={36} color="#EEEEEE" />
+        </Pressable>
+        <Pressable onPress={startHandler}>
+          <Ionicons name="play" size={36} color="#00ADB5" />
+        </Pressable>
+        <Pressable onPress={editHandler}>
+          <Ionicons name="create-outline" size={36} color="#EEEEEE" />
+        </Pressable>
       </View>
     </View>
   );
@@ -208,21 +206,8 @@ export default DisplaySavedWorkoutScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
+
     backgroundColor: "#222831",
-  },
-  button: {
-    position: "absolute",
-    backgroundColor: "#393E46",
-    // backgroundColor: "#00ADB5",
-    bottom: 8,
-    marginBottom: 5,
-    borderRadius: 50,
-  },
-  btnText: {
-    color: "#00ADB5",
-    // color: "#EEEEEE",
-    fontSize: 24,
   },
   inputContainer: {
     marginBottom: 14,
@@ -234,7 +219,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 14,
     borderColor: "black",
-    color: "#5a5b5e",
+    color: "#1e1f1f",
     borderBottomWidth: 0.5,
     borderRadius: 4,
   },
@@ -250,5 +235,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     width: "50%",
+  },
+  footer: {
+    backgroundColor: "#393E46",
+    padding: 12,
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
 });

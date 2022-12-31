@@ -105,10 +105,8 @@ export function generateCustomWorkout(userInput, exerciseList, breakId) {
 
   const numOfSets = parseInt(userInput.sets);
   const numOfRounds = parseInt(userInput.rounds);
-  const breakLength =
-    userInput.break.trim() === "" ? 0 : parseInt(userInput.break);
-  const restLength =
-    userInput.rest.trim() === "" ? 0 : parseInt(userInput.rest);
+  const breakLength = userInput.break === "" ? 0 : parseInt(userInput.break);
+  const restLength = userInput.rest === "" ? 0 : parseInt(userInput.rest);
   const exerciseLength = parseInt(userInput.length);
   const breakObj = { name: "Break", id: breakId, length: breakLength };
   // console.log(breakLength);

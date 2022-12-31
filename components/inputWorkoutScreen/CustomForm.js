@@ -38,7 +38,7 @@ function CustomForm({ inputHandler, totalTime, userInput }) {
       break: inputBreak,
       rounds: inputRounds,
     };
-    console.log(inputs);
+    // console.log(inputs);
 
     inputHandler(inputs);
   }
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     borderColor: "black",
-    color: "#017a81",
+    color: "#06393c",
     borderBottomWidth: 0.5,
   },
   totalTimeText: {

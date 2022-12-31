@@ -182,7 +182,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderColor: "black",
 
-    paddingStart: 4,
     backgroundColor: "#EEEEEE",
   },
   btnWidth: {

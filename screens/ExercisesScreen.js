@@ -53,7 +53,7 @@ function ExercisesScreen({ navigation, route }) {
             style={{ marginLeft: 16, marginRight: 16 }}
             onPress={returnHome}
           >
-            <Ionicons name="home-outline" size={24} color="#EEEEEE" />
+            <Ionicons name="arrow-back" size={24} color="#EEEEEE" />
           </Pressable>
         );
       },

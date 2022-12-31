@@ -3,7 +3,6 @@ import Card from "../components/Card";
 import { Ionicons } from "@expo/vector-icons";
 import CustomForm from "../components/inputWorkoutScreen/CustomForm";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
-import Checkbox from "expo-checkbox";
 import DropdownPickers from "../components/inputWorkoutScreen/DropdownPickers";
 import {
   ScaleDecorator,
@@ -22,6 +21,8 @@ import { useToast } from "react-native-toast-notifications";
 import HideWithKeyboard from "react-native-hide-with-keyboard";
 import FloatingButton from "../components/FloatingButton";
 import AddNewExerciseModal from "../components/AddNewExerciseModal";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const db = DatabaseConnection.getConnection();
 
@@ -71,7 +72,10 @@ function CustomInputScreen({ route, navigation }) {
           "SELECT category.id AS value, category.name AS label FROM category",
           [],
           (tx, results) => {
-            setCategories((val) => [...results.rows._array]);
+            const noCatObj = { value: null, label: "No Category" };
+            if (results.rows.length > 0) {
+              setCategories((val) => [...results.rows._array, noCatObj]);
+            }
           }
         );
       });
@@ -85,6 +89,7 @@ function CustomInputScreen({ route, navigation }) {
     }
     // console.log("use", isEdit);
     // header options
+
     setOptions();
   }, [exerciseList, userInput]);
 
@@ -108,50 +113,48 @@ function CustomInputScreen({ route, navigation }) {
   function onSelectCategory(categoryId) {
     // console.log(categoryId);
     setCategoryId(categoryId);
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM exercises WHERE category_id = ?",
-        [categoryId],
-        (tx, result) => {
-          if (result.rows.length > 0) {
-            let exercisesFromDb = result.rows._array.map((item) => {
-              return {
-                name: item.name,
-                id: item.id,
-                description: item.description,
-                category_id: item.category_id,
-                isChecked: false,
-              };
-            });
-            setExercisesFromDb((val) => [...exercisesFromDb]);
 
-            // array of ids in already selected exercises
-            const exercisesIds = exerciseList.map((val) => val.id);
-
-            // filter out any that have already been selected
-            let filtered = exercisesFromDb.filter(
-              (val) => !exercisesIds.includes(val.id)
-            );
-
-            // set exercises for dropdown
-            setExercises((val) => [
-              {
+    if (categoryId === null) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id IS NULL",
+          [],
+          (tx, results) => {
+            let length = results.rows.length;
+            let resultArr = results.rows._array;
+            if (length > 0) {
+              refreshExerciseLists(resultArr);
+            } else {
+              setExercises({
                 id: new Date().getTime(),
-                name: "Break",
-                length: parseInt(userInput.break),
-                isChecked: false,
-              },
-              ...filtered,
-            ]);
-          } else {
-            setExercises({
-              id: new Date().getTime(),
-              name: "No Exercises",
-            });
+                name: "No Exercises",
+              });
+            }
+          },
+          (tx, error) => {
+            console.log(error.message);
           }
-        }
-      );
-    });
+        );
+      });
+    } else {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM exercises WHERE category_id = ?",
+          [categoryId],
+          (tx, result) => {
+            if (result.rows.length > 0) {
+              let resultsArr = result.rows._array;
+              refreshExerciseLists(resultsArr);
+            } else {
+              setExercises({
+                id: new Date().getTime(),
+                name: "No Exercises",
+              });
+            }
+          }
+        );
+      });
+    }
   }
 
   // console.log("workoutOrder length: " + workoutOrder.length);
@@ -164,7 +167,6 @@ function CustomInputScreen({ route, navigation }) {
     const breakObj = {
       id: uuid.v4(),
       name: "Break",
-      isChecked: false,
     };
 
     // update list of exercises in dropdown and displayed
@@ -178,12 +180,17 @@ function CustomInputScreen({ route, navigation }) {
     setExerciseList((prev) => [...prev, exercise]);
   }
   // console.log(workoutOrder.length);
-  // delete all checked exercises
-  function deleteChecked() {
-    const updateList = exerciseList.filter((item) => item.isChecked === false);
+
+  // delete exercises
+  function deleteChecked(id) {
+    // console.log(id);
+    const updateList = exerciseList.filter((item) => item.id !== id);
     setExerciseList((val) => [...updateList]);
 
+    // get ids from updated list
     const exercisesIds = updateList.map((val) => val.id);
+
+    // filter ids from list for the drop down menu
     let filtered = exercisesFromDb.filter(
       (val) => !exercisesIds.includes(val.id)
     );
@@ -192,7 +199,6 @@ function CustomInputScreen({ route, navigation }) {
         id: uuid.v4(),
         name: "Break",
         length: userInput.break,
-        isChecked: false,
       },
       ...filtered,
     ]);
@@ -304,14 +310,42 @@ function CustomInputScreen({ route, navigation }) {
     }
   }
 
+  // refreshes exercises lists dropdown and selected when there is change
+  function refreshExerciseLists(resultArr) {
+    const filteredBreaks = resultArr.filter((e) => e.id !== breakId);
+    setExercisesFromDb((val) => [...filteredBreaks]);
+
+    const exercisesIds = exerciseList.map((val) => val.id);
+    const filtered = filteredBreaks.filter(
+      (val) => !exercisesIds.includes(val.id)
+    );
+    setExercises((val) => [
+      {
+        id: new Date().getTime(),
+        name: "Break",
+        length: parseInt(userInput.break),
+      },
+      ...filtered,
+    ]);
+  }
+
   function setOptions() {
     navigation.setOptions({
       headerRight: () => {
-        return (
-          <Pressable style={{ paddingEnd: 24 }} onPress={onSave}>
-            <Ionicons name="save-outline" size={30} color="#EEEEEE" />
-          </Pressable>
-        );
+        if (
+          userInput.name === "" ||
+          exerciseList.length === 0 ||
+          userInput.length === "0" ||
+          userInput.length === ""
+        ) {
+          return "";
+        } else {
+          return (
+            <Pressable style={{ paddingEnd: 24 }} onPress={onSave}>
+              <Ionicons name="save-outline" size={30} color="#EEEEEE" />
+            </Pressable>
+          );
+        }
       },
     });
   }
@@ -340,11 +374,29 @@ function CustomInputScreen({ route, navigation }) {
       ),
     ]);
 
+    onSelectCategory(categoryId);
     toggleModal();
   }
 
   function toggleModal() {
     isModalOpen ? setIsModalOpen(false) : setIsModalOpen(true);
+  }
+
+  function renderText(isBreak) {
+    // console.log(isBreak);
+    if (!isBreak) {
+      if (userInput.length === "0" || userInput.length === "") {
+        return "";
+      } else {
+        return `${userInput.length} sec x ${userInput.sets}`;
+      }
+    } else if (isBreak) {
+      if (userInput.break === "0" || (isBreak && userInput.break === "")) {
+        return "";
+      } else {
+        return `${userInput.break} sec`;
+      }
+    }
   }
 
   return (
@@ -377,56 +429,57 @@ function CustomInputScreen({ route, navigation }) {
             keyExtractor={(item) => item.id}
             renderItem={({ item, drag, isActive }) => {
               const isBreak = item.name === "Break" ? true : false;
-              const breakText =
-                userInput.break === "" ? "0 sec" : userInput.break + " sec";
               return (
                 <ScaleDecorator>
-                  <Card style={isBreak ? styles.breakContainer : ""}>
+                  <Card
+                    style={[
+                      { paddingEnd: 0 },
+                      isBreak ? styles.breakContainer : "",
+                    ]}
+                  >
                     <RowSpaceBetween>
                       <View>
                         <View style={{ flexDirection: "row" }}>
-                          <View
-                            style={{
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Checkbox
-                              style={styles.checkBox}
-                              value={item.isChecked}
-                              onValueChange={(value) => {
-                                const index = exerciseList.findIndex((obj) => {
-                                  return obj.id === item.id;
-                                });
-                                const updatedList = exerciseList;
-                                updatedList[index].isChecked = value;
-                                setExerciseList((val) => [...updatedList]);
+                          <View style={styles.centerView}>
+                            <Pressable
+                              onPress={() => {
+                                deleteChecked(item.id);
                               }}
-                            />
+                            >
+                              <Ionicons
+                                name="trash-outline"
+                                size={24}
+                                color="#f31313"
+                              />
+                            </Pressable>
                           </View>
 
-                          <View>
+                          <View
+                            style={{
+                              borderLeftWidth: 0.5,
+                              borderLeftColor: "black",
+                              paddingLeft: 8,
+                            }}
+                          >
                             <Text style={isBreak ? styles.breakText : ""}>
                               {item.name}
                             </Text>
-                            {userInput.length !== "" && (
-                              <Text style={isBreak ? styles.breakText : ""}>
-                                {isBreak
-                                  ? breakText
-                                  : `${userInput.length} sec x${userInput.sets} `}
-                              </Text>
-                            )}
+
+                            <Text style={isBreak ? styles.breakText : ""}>
+                              {renderText(isBreak)}
+                            </Text>
                           </View>
                         </View>
                       </View>
-
-                      <Pressable onPressIn={drag} disabled={isActive}>
-                        <Ionicons
-                          name="reorder-three-outline"
-                          size={38}
-                          color="black"
-                        />
-                      </Pressable>
+                      <View style={{ flexDirection: "row" }}>
+                        <Pressable onPressIn={drag} disabled={isActive}>
+                          <MaterialCommunityIcons
+                            name="drag-vertical"
+                            size={36}
+                            color="black"
+                          />
+                        </Pressable>
+                      </View>
                     </RowSpaceBetween>
                   </Card>
                 </ScaleDecorator>
@@ -445,10 +498,6 @@ function CustomInputScreen({ route, navigation }) {
           </Pressable>
           <Pressable onPress={toggleModal}>
             <Ionicons name="add" size={32} color="#EEEEEE" />
-          </Pressable>
-
-          <Pressable onPress={deleteChecked}>
-            <Ionicons name="trash-outline" size={32} color="#fe7a7a" />
           </Pressable>
         </View>
       </HideWithKeyboard>
@@ -475,18 +524,16 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: "#222831",
   },
-
+  centerView: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingEnd: 4,
+  },
   breakContainer: {
     backgroundColor: "#00ADB5",
   },
   breakText: {
     color: "#EEEEEE",
-  },
-  checkBox: {
-    marginEnd: 10,
-    height: 25,
-    width: 25,
-    padding: 8,
   },
   footer: {
     backgroundColor: "#393E46",

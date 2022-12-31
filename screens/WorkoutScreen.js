@@ -18,7 +18,7 @@ function WorkoutScreen({ route, navigation }) {
   const [hasPaused, setHasPaused] = useState(false);
   const [totalTime, setTotalTime] = useState();
   const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
-  const [sound, setSound] = useState();
+  const [soundOn, setSoundOn] = useState(true);
 
   const [currentExercise, setCurrentExercise] = useState({
     name: "",
@@ -69,11 +69,13 @@ function WorkoutScreen({ route, navigation }) {
 
         setTimer(timer - 1);
       }, 900);
-      if (timer <= 4 && timer > 1) {
-        playBeep();
-      }
-      if (timer === 1) {
-        playLongBeep();
+      if (soundOn) {
+        if (timer <= 4 && timer > 1) {
+          playBeep();
+        }
+        if (timer === 1) {
+          playLongBeep();
+        }
       }
       if (timer < 1) {
         clearTimeout(countdown);
@@ -183,6 +185,9 @@ function WorkoutScreen({ route, navigation }) {
     setWorkoutList(newWorkout);
   }
 
+  function toggleSound() {
+    soundOn ? setSoundOn(false) : setSoundOn(true);
+  }
   return (
     <View style={styles.container}>
       {!isFinished && (
@@ -230,6 +235,8 @@ function WorkoutScreen({ route, navigation }) {
           onStop={onStop}
           onSkip={onSkip}
           hasPaused={hasPaused}
+          isSound={soundOn}
+          toggleSound={toggleSound}
         />
       )}
 
