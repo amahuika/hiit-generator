@@ -3,13 +3,25 @@ import { useState } from "react";
 
 import Card from "../Card";
 
-function CustomForm({ inputHandler, totalTime, userInput }) {
-  const [inputName, setInputName] = useState(userInput.name);
-  const [inputSets, setInputSets] = useState(userInput.sets);
-  const [inputLength, setInputLength] = useState(userInput.length);
-  const [inputRest, setInputRest] = useState(userInput.rest);
-  const [inputBreak, setInputBreak] = useState(userInput.break);
-  const [inputRounds, setInputRounds] = useState(userInput.rounds);
+function CustomForm({ inputHandler, totalTime, workoutDetails }) {
+  const [inputName, setInputName] = useState(
+    workoutDetails === null ? "" : workoutDetails.name
+  );
+  const [inputSets, setInputSets] = useState(
+    workoutDetails === null ? "1" : workoutDetails.sets.toString()
+  );
+  const [inputLength, setInputLength] = useState(
+    workoutDetails === null ? "" : workoutDetails.length.toString()
+  );
+  const [inputRest, setInputRest] = useState(
+    workoutDetails === null ? "" : workoutDetails.rest.toString()
+  );
+  const [inputBreak, setInputBreak] = useState(
+    workoutDetails === null ? "" : workoutDetails.break.toString()
+  );
+  const [inputRounds, setInputRounds] = useState(
+    workoutDetails === null ? "1" : workoutDetails.rounds.toString()
+  );
   const [isFocused, setIsFocused] = useState({
     name: false,
     sets: false,

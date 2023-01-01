@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -22,6 +22,7 @@ import Modal from "react-native-modal";
 
 import { Ionicons } from "@expo/vector-icons";
 import RowSpaceBetween from "../components/RowSpaceBetween";
+import { useFocusEffect } from "@react-navigation/native";
 
 const db = DatabaseConnection.getConnection();
 
@@ -30,40 +31,22 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
   const [workoutOrder, setWorkoutOrder] = useState([]);
   const [totalTime, setTotalTime] = useState("");
   const [breakId, setBreakId] = useState();
+  const [SavedWorkout, setSavedWorkout] = useState({
+    name: null,
+    length: null,
+    rest: null,
+    break: null,
+    sets: null,
+    rounds: null,
+    total_time: null,
+  });
+
+  // const [isActive, setIsActive] = useState(true);
 
   const workoutDetails = route.params.workout;
 
   useEffect(() => {
-    navigation.setOptions({ title: workoutDetails.name });
-    if (workoutList.length === 0) {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM workout_junction WHERE workout_id = ?",
-          [workoutDetails.id],
-          (tx, results) => {
-            for (const item of results.rows._array) {
-              tx.executeSql(
-                "SELECT * FROM exercises WHERE id = ?",
-                [item.exercise_id],
-                (tx, results) => {
-                  const resultObj = results.rows._array[0];
-                  if (resultObj.name === "Break") {
-                    setBreakId(resultObj.id);
-                    resultObj.id = new Date().getTime();
-                    resultObj.length = workoutDetails.break;
-                  } else {
-                    resultObj.length = workoutDetails.length;
-                    resultObj.sets = workoutDetails.sets;
-                  }
-
-                  setWorkoutList((val) => [...val, resultObj]);
-                }
-              );
-            }
-          }
-        );
-      });
-    }
+    console.log(workoutList.map((e) => e.name));
 
     if (workoutList.length > 0) {
       // check if rounds is null if it is then this is a random workout
@@ -71,7 +54,7 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
         MyRandomWorkoutOrder();
       } else {
         const getWorkoutOrder = generateCustomWorkout(
-          workoutDetails,
+          SavedWorkout,
           workoutList,
           breakId
         );
@@ -82,11 +65,68 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
         getWorkoutOrder.map((item) => (count += item.length));
         const totalTime = displayTimeRemaining(count);
         setTotalTime(totalTime);
-
-        // setRefresh((val) => val + 1);
       }
     }
-  }, [workoutList]);
+  }, [workoutList, SavedWorkout]);
+
+  useFocusEffect(
+    useCallback(() => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM saved_workouts WHERE id = ?",
+          [workoutDetails.id],
+          (tx, results) => {
+            const savedWorkoutResults = results.rows._array[0];
+            setSavedWorkout((_) => savedWorkoutResults);
+
+            tx.executeSql(
+              "SELECT * FROM workout_junction WHERE workout_id = ?",
+              [workoutDetails.id],
+              (tx, results) => {
+                const resultsArray = results.rows._array;
+                const ids = resultsArray.map((e) => e.exercise_id);
+                let caseExpr = "";
+                ids.forEach((id, index) => {
+                  caseExpr += `WHEN ${id} THEN ${index} `;
+                });
+                const questionMarks = resultsArray.map((e) => "?").join(",");
+                tx.executeSql(
+                  "SELECT * FROM exercises WHERE id IN (" +
+                    questionMarks +
+                    ") ORDER BY CASE id " +
+                    caseExpr +
+                    "END",
+                  [...ids],
+                  (tx, results) => {
+                    const resultsArray = results.rows._array;
+                    console.log(savedWorkoutResults.break);
+                    const updatedArray = resultsArray.map((item) => {
+                      if (item.name === "Break") {
+                        setBreakId(item.id);
+                        return {
+                          ...item,
+                          id: new Date().getTime(),
+                          length: savedWorkoutResults.break,
+                        };
+                      } else {
+                        return {
+                          ...item,
+                          length: savedWorkoutResults.length,
+                          sets: savedWorkoutResults.sets,
+                        };
+                      }
+                    });
+                    setWorkoutList((_) => [...updatedArray]);
+                  }
+                );
+              }
+            );
+            navigation.setOptions({ title: savedWorkoutResults.name });
+          }
+        );
+      });
+    }, [])
+  );
 
   function navigateToPreview() {
     navigation.navigate("preview", { workoutList: workoutOrder });
@@ -121,19 +161,15 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
   }
 
   function editHandler() {
-    console.log("edit");
+    navigation.navigate("customInput", {
+      workoutDetails: SavedWorkout,
+      workoutList: workoutList,
+      exerciseOrder: workoutOrder,
+    });
 
-    // need to pass relevant data for editing to the custom form page, details, display list, full workout, and maybe a boolean isEdit? maybe
-
-    // all details for form
-    console.log(workoutDetails);
-
-    // list for display
-    console.log(workoutList.length);
-
-    // full workout order
-    console.log(workoutOrder.length);
-    // navigation.navigate("customInput");
+    // const workoutDetails = route.params.workoutDetails;
+    // const workoutList = route.params.workoutList;
+    // const exerciseOrder = route.params.exerciseOrder;
   }
 
   return (
@@ -145,11 +181,11 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
           <RowSpaceBetween>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Number of sets</Text>
-              <Text style={styles.input}>{workoutDetails.sets}</Text>
+              <Text style={styles.input}>{SavedWorkout.sets}</Text>
             </View>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Length of exercise (sec)</Text>
-              <Text style={styles.input}>{workoutDetails.length} </Text>
+              <Text style={styles.input}>{SavedWorkout.length} </Text>
             </View>
           </RowSpaceBetween>
           <RowSpaceBetween>
@@ -158,20 +194,20 @@ function DisplaySavedWorkoutScreen({ route, navigation }) {
                 Rest between exercises (sec)
               </Text>
               <Text style={styles.input}>
-                {workoutDetails.rest === "" ? "0" : workoutDetails.rest}
+                {SavedWorkout.rest === "" ? "0" : SavedWorkout.rest}
               </Text>
             </View>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Breaks (sec)</Text>
               <Text style={styles.input}>
-                {workoutDetails.break === "" ? "0" : workoutDetails.break}
+                {SavedWorkout.break === "" ? "0" : SavedWorkout.break}
               </Text>
             </View>
           </RowSpaceBetween>
           <RowSpaceBetween>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Rounds</Text>
-              <Text style={styles.input}>{workoutDetails.rounds}</Text>
+              <Text style={styles.input}>{SavedWorkout.rounds}</Text>
             </View>
             <View
               style={{

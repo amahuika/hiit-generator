@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ScrollView,
-} from "react-native";
-import Card from "../components/Card";
+import { View, StyleSheet, Pressable, Alert, ScrollView } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "react-native-toast-notifications";
 

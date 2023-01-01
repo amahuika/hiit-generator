@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
 import Card from "../components/Card";
@@ -44,7 +44,7 @@ function ExercisesScreen({ navigation, route }) {
       }),
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       title: "Exercises",
       headerLeft: () => {

@@ -1,11 +1,10 @@
 import { View, StyleSheet, ScrollView, Text, Button } from "react-native";
 import MyButton from "../components/MyButton";
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createTable, dropTables } from "../HelperFunctions/DatabaseFunctions";
 
 import { updatedExercises } from "../assets/exerciseData/ExerciseData";
-import { Audio } from "expo-av";
 
 // Upper Body = 1
 // Lower Body = 2
@@ -99,6 +98,24 @@ function HomeScreen({ route, navigation }) {
     <View style={styles.container}>
       {/* <LinearGradient style={styles.background} colors={["#393E46"]} /> */}
       {/* <View style={styles.buttonContainer}> */}
+      {/* <MyButton
+        onPress={getStartedHandle}
+        txtStyle={styles.buttonText}
+        style={styles.button}
+        text="Random Workout"
+      />
+      <MyButton
+        onPress={getStartedHandle}
+        txtStyle={styles.buttonText}
+        style={styles.button}
+        text="Custom Timer"
+      />
+      <MyButton
+        onPress={getStartedHandle}
+        txtStyle={styles.buttonText}
+        style={styles.button}
+        text="Custom Reps"
+      /> */}
       <MyButton
         onPress={getStartedHandle}
         txtStyle={styles.buttonText}

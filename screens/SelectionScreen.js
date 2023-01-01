@@ -7,22 +7,35 @@ function SelectionScreen({ route, navigation }) {
   }
 
   function onCustom() {
-    console.log("Custom Workout");
-    navigation.navigate("customInput");
+    // console.log("Custom Workout");
+    navigation.navigate("customInput", {
+      workoutDetails: null,
+      workoutList: null,
+      exerciseOrder: null,
+    });
   }
 
   return (
     <View style={styles.container}>
       <SelectionButton
-        title="Random Workout"
+        title="Random Timer Workout"
         subtitle="Randomly generated workout"
         onPress={onRandom}
+        icon={"timer-outline"}
       />
 
       <SelectionButton
-        title="Custom Workout"
-        subtitle="Custom made workout"
+        title="Custom Timer Workout"
+        subtitle="Custom made timed workout"
         onPress={onCustom}
+        icon={"timer-outline"}
+      />
+
+      <SelectionButton
+        title="Custom Reps Workout"
+        subtitle="Custom made reps workout"
+        onPress={onCustom}
+        icon={"list-outline"}
       />
     </View>
   );

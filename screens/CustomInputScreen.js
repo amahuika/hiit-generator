@@ -13,7 +13,7 @@ import {
   displayTimeRemaining,
   generateCustomWorkout,
 } from "../HelperFunctions/HelperFunctions";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import uuid from "react-native-uuid";
 import RowSpaceBetween from "../components/RowSpaceBetween";
 import { saveWorkoutHandler } from "../HelperFunctions/DatabaseFunctions";
@@ -23,6 +23,7 @@ import FloatingButton from "../components/FloatingButton";
 import AddNewExerciseModal from "../components/AddNewExerciseModal";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Footer from "../components/inputWorkoutScreen/Footer";
 
 const db = DatabaseConnection.getConnection();
 
@@ -34,7 +35,7 @@ function CustomInputScreen({ route, navigation }) {
   const [exercisesFromDb, setExercisesFromDb] = useState([]);
   const [breakId, setBreakId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isUpdatedOnEdit, setIsUpdatedOnEdit] = useState(false);
   const [categoryId, setCategoryId] = useState(null);
   const [exercises, setExercises] = useState([
     { name: "No category selected" },
@@ -50,7 +51,27 @@ function CustomInputScreen({ route, navigation }) {
 
   const toast = useToast();
 
+  const workoutDetails = route.params.workoutDetails;
+  const workoutList = route.params.workoutList;
+  const exerciseOrder = route.params.exerciseOrder;
+
   useEffect(() => {
+    // set details from edit if they are not null
+    if (workoutDetails !== null && !isUpdatedOnEdit) {
+      setUserInput((val) => ({
+        name: workoutDetails.name,
+        sets: workoutDetails.sets,
+        length: workoutDetails.length,
+        rest: workoutDetails.rest,
+        break: workoutDetails.break,
+        rounds: workoutDetails.rounds,
+      }));
+      setExerciseList((val) => [...workoutList]);
+      setWorkoutOrder((val) => [...exerciseOrder]);
+      console.log(workoutDetails);
+      setIsUpdatedOnEdit(true);
+    }
+    // console.log(userInput);
     // get the break id from db
     if (breakId === null) {
       db.transaction((tx) => {
@@ -182,7 +203,7 @@ function CustomInputScreen({ route, navigation }) {
   // console.log(workoutOrder.length);
 
   // delete exercises
-  function deleteChecked(id) {
+  function onDelete(id) {
     // console.log(id);
     const updateList = exerciseList.filter((item) => item.id !== id);
     setExerciseList((val) => [...updateList]);
@@ -250,8 +271,6 @@ function CustomInputScreen({ route, navigation }) {
   function onSave() {
     if (userInput.name === "" || userInput.name === null) return;
     if (exerciseList.length > 0) {
-      // saveWorkoutHandler(userInput, totalWorkoutTime, exerciseList, breakId);
-
       const updatedList = exerciseList.map((e, i) => {
         if (e.name === "Break") {
           return { ...e, id: breakId };
@@ -260,53 +279,113 @@ function CustomInputScreen({ route, navigation }) {
         }
       });
 
+      console.log(updatedList);
+
       let lastId;
-
-      db.transaction((tx) => {
-        tx.executeSql(
-          "INSERT INTO saved_workouts (name, length, rest, break, sets, rounds, total_time) VALUES (?,?,?,?,?,?,?)",
-          [
-            userInput.name,
-            userInput.length,
-            userInput.rest,
-            userInput.break,
-            userInput.sets,
-            userInput.rounds,
-            totalWorkoutTime,
-          ],
-          (tx, results) => {
-            console.log("workout id entered " + results.insertId);
-            if (results.insertId > 0) {
-              lastId = results.insertId;
-
-              for (const exercise of updatedList) {
-                tx.executeSql(
-                  "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
-                  [lastId, exercise.id],
-                  (tx, results) => {
-                    if (results.rowsAffected > 0) {
-                    }
-                  },
-                  (tx, error) => {
-                    console.log(error.message);
-                  }
-                );
+      if (workoutDetails !== null) {
+        // "UPDATE exercises SET name = ?, category_id = ?, description = ? WHERE id =?",
+        // console.log(userInput.length);
+        // console.log(totalWorkoutTime);
+        db.transaction((tx) => {
+          tx.executeSql(
+            "DELETE FROM workout_junction WHERE workout_id = ?",
+            [workoutDetails.id],
+            (tx, results) => {
+              if (results.rowsAffected > 0) {
               }
-
-              if (lastId > 0) {
-                toast.show("Workout saved successfully", {
-                  duration: 3000,
-                  type: "success",
-                  placement: "bottom",
-                });
-              }
+            },
+            (_, error) => {
+              console.log(error.message);
             }
-          },
-          (tx, error) => {
-            console.log(error.message);
-          }
-        );
-      });
+          );
+          tx.executeSql(
+            "UPDATE saved_workouts SET name = ?, length = ?, rest = ?, break = ?, sets = ?, rounds = ?, total_time = ? WHERE id = ?",
+            [
+              userInput.name,
+              userInput.length,
+              userInput.rest,
+              userInput.break,
+              userInput.sets,
+              userInput.rounds,
+              totalWorkoutTime,
+              workoutDetails.id,
+            ],
+            (tx, results) => {
+              if (results.rowsAffected > 0) {
+                for (const exercise of updatedList) {
+                  console.log("Test");
+                  tx.executeSql(
+                    "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
+                    [workoutDetails.id, exercise.id],
+                    (tx, results) => {
+                      if (results.rowsAffected > 0) {
+                      }
+                    },
+                    (tx, error) => {
+                      console.log(error.message);
+                    }
+                  );
+                }
+              }
+            },
+            (tx, error) => {
+              console.log(error.message);
+            }
+          );
+        });
+        toast.show("  Updated successfully!  ", {
+          type: "success",
+          duration: 3000,
+          placement: "bottom",
+        });
+        // navigation.goBack();
+      } else {
+        db.transaction((tx) => {
+          tx.executeSql(
+            "INSERT INTO saved_workouts (name, length, rest, break, sets, rounds, total_time) VALUES (?,?,?,?,?,?,?)",
+            [
+              userInput.name,
+              userInput.length,
+              userInput.rest,
+              userInput.break,
+              userInput.sets,
+              userInput.rounds,
+              totalWorkoutTime,
+            ],
+            (tx, results) => {
+              console.log("workout id entered " + results.insertId);
+              if (results.insertId > 0) {
+                lastId = results.insertId;
+
+                for (const exercise of updatedList) {
+                  tx.executeSql(
+                    "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
+                    [lastId, exercise.id],
+                    (tx, results) => {
+                      if (results.rowsAffected > 0) {
+                      }
+                    },
+                    (tx, error) => {
+                      console.log(error.message);
+                    }
+                  );
+                }
+
+                if (lastId > 0) {
+                  toast.show("Workout saved successfully", {
+                    duration: 3000,
+                    type: "success",
+                    placement: "bottom",
+                  });
+                }
+              }
+            },
+            (tx, error) => {
+              console.log(error.message);
+            }
+          );
+        });
+      }
     }
   }
 
@@ -330,31 +409,14 @@ function CustomInputScreen({ route, navigation }) {
   }
 
   function setOptions() {
+    const renderTitle =
+      workoutDetails === null ? "Custom Workout" : "Edit Workout";
     navigation.setOptions({
-      headerRight: () => {
-        if (
-          userInput.name === "" ||
-          exerciseList.length === 0 ||
-          userInput.length === "0" ||
-          userInput.length === ""
-        ) {
-          return "";
-        } else {
-          return (
-            <Pressable style={{ paddingEnd: 24 }} onPress={onSave}>
-              <Ionicons name="save-outline" size={30} color="#EEEEEE" />
-            </Pressable>
-          );
-        }
-      },
+      title: renderTitle,
     });
   }
 
   function addHandle(name, catId, description) {
-    // console.log("Add name: " + name);
-    // console.log("Add catId: " + catId);
-    // console.log("Add desc: " + description);
-
     db.transaction((tx) => [
       tx.executeSql(
         "INSERT INTO exercises (name, category_id, description) VALUES (?,?,?)",
@@ -374,7 +436,9 @@ function CustomInputScreen({ route, navigation }) {
       ),
     ]);
 
+    // refresh list
     onSelectCategory(categoryId);
+    // close modal
     toggleModal();
   }
 
@@ -384,11 +448,12 @@ function CustomInputScreen({ route, navigation }) {
 
   function renderText(isBreak) {
     // console.log(isBreak);
+    const set = userInput.sets > 1 ? "sets" : "set";
     if (!isBreak) {
       if (userInput.length === "0" || userInput.length === "") {
         return "";
       } else {
-        return `${userInput.length} sec x ${userInput.sets}`;
+        return `${userInput.length} sec | ${userInput.sets} ${set}`;
       }
     } else if (isBreak) {
       if (userInput.break === "0" || (isBreak && userInput.break === "")) {
@@ -408,7 +473,7 @@ function CustomInputScreen({ route, navigation }) {
         <CustomForm
           inputHandler={inputHandler}
           totalTime={totalWorkoutTime}
-          userInput={userInput}
+          workoutDetails={workoutDetails}
         />
 
         <View>
@@ -443,7 +508,7 @@ function CustomInputScreen({ route, navigation }) {
                           <View style={styles.centerView}>
                             <Pressable
                               onPress={() => {
-                                deleteChecked(item.id);
+                                onDelete(item.id);
                               }}
                             >
                               <Ionicons
@@ -489,17 +554,13 @@ function CustomInputScreen({ route, navigation }) {
         </View>
       </NestableScrollContainer>
       <HideWithKeyboard>
-        <View style={styles.footer}>
-          <Pressable style={{ marginEnd: 32 }} onPress={preview}>
-            <Ionicons name="list" size={32} color="#EEEEEE" />
-          </Pressable>
-          <Pressable style={{ marginEnd: 32 }} onPress={startHandler}>
-            <Ionicons name="play" size={32} color="#00ADB5" />
-          </Pressable>
-          <Pressable onPress={toggleModal}>
-            <Ionicons name="add" size={32} color="#EEEEEE" />
-          </Pressable>
-        </View>
+        <Footer
+          onPreview={preview}
+          onSave={onSave}
+          onStart={startHandler}
+          onToggle={toggleModal}
+          workoutDetails={workoutDetails}
+        />
       </HideWithKeyboard>
 
       {/* Need to create props for the add modal & add a button to add a new exercise */}
@@ -534,11 +595,5 @@ const styles = StyleSheet.create({
   },
   breakText: {
     color: "#EEEEEE",
-  },
-  footer: {
-    backgroundColor: "#393E46",
-    padding: 12,
-    flexDirection: "row",
-    justifyContent: "space-around",
   },
 });

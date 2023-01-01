@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,22 +10,29 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { DatabaseConnection } from "../assets/database/DatabaseConnection";
+import { useFocusEffect } from "@react-navigation/native";
 
 const db = DatabaseConnection.getConnection();
 
 function MyWorkoutsScreen({ route, navigation }) {
   const [myWorkoutList, setMyWorkoutList] = useState([]);
 
-  useEffect(() => {
-    getSavedWorkouts();
-  }, []);
+  // useEffect(() => {
+  //   getSavedWorkouts();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getSavedWorkouts();
+    }, [])
+  );
 
   function getSavedWorkouts() {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM saved_workouts", [], (tx, results) => {
-        if (results.rows.length !== myWorkoutList.length) {
+        if (results.rows.length > 0) {
           setMyWorkoutList((val) => [...results.rows._array]);
-          console.log(results.rows._array);
+          // console.log(results.rows._array);
         }
       });
     });

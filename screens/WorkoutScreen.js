@@ -19,6 +19,8 @@ function WorkoutScreen({ route, navigation }) {
   const [totalTime, setTotalTime] = useState();
   const [totalTimeInSeconds, setTotalTimeInSeconds] = useState(null);
   const [soundOn, setSoundOn] = useState(true);
+  const [shortBeep, setShortBeep] = useState(null);
+  const [longBeep, setLongBeep] = useState(null);
 
   const [currentExercise, setCurrentExercise] = useState({
     name: "",
@@ -43,6 +45,12 @@ function WorkoutScreen({ route, navigation }) {
   // console.log(workout);
 
   useEffect(() => {
+    if (shortBeep === null) {
+      loadBeep();
+    }
+    if (longBeep === null) {
+      loadLongBeep();
+    }
     navigation.setOptions({
       title: workoutName === null ? "Workout Generator" : workoutName,
       headerLeft: () => null,
@@ -71,10 +79,10 @@ function WorkoutScreen({ route, navigation }) {
       }, 900);
       if (soundOn) {
         if (timer <= 4 && timer > 1) {
-          playBeep();
+          if (shortBeep) shortBeep.replayAsync();
         }
         if (timer === 1) {
-          playLongBeep();
+          if (longBeep) longBeep.replayAsync();
         }
       }
       if (timer < 1) {
@@ -115,19 +123,39 @@ function WorkoutScreen({ route, navigation }) {
     };
   }, [timer, hasPaused, hasStarted]);
 
+  async function loadBeep() {
+    const soundObj = new Audio.Sound();
+    try {
+      await soundObj.loadAsync(require("../assets/sounds/shortBeep.mp3"));
+      setShortBeep(soundObj);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function loadLongBeep() {
+    const soundObj = new Audio.Sound();
+    try {
+      await soundObj.loadAsync(require("../assets/sounds/longBeep.mp3"));
+      setLongBeep(soundObj);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function playBeep() {
-    const { sound } = await Audio.Sound.createAsync(
-      require(`../assets/sounds/shortBeep.mp3`)
-    );
-    // setSound(sound);
-    await sound.playAsync();
+    const soundObj = new Audio.Sound();
+    try {
+      await soundObj.loadAsync(require(`../assets/sounds/shortBeep.mp3`));
+      await soundObj.playAsync();
+    } catch {}
   }
   async function playLongBeep() {
-    const { sound } = await Audio.Sound.createAsync(
-      require(`../assets/sounds/longBeep.mp3`)
-    );
-    // setSound(sound);
-    await sound.playAsync();
+    const soundObj = new Audio.Sound();
+    try {
+      await soundObj.loadAsync(require(`../assets/sounds/longBeep.mp3`));
+      await soundObj.playAsync();
+    } catch {}
   }
 
   // console.log("time " + workoutTotalTime);

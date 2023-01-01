@@ -1,7 +1,7 @@
 import { View, Pressable, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-function SelectionButton({ title, subtitle, onPress }) {
+function SelectionButton({ title, subtitle, onPress, icon }) {
   return (
     <View>
       <Pressable
@@ -10,7 +10,7 @@ function SelectionButton({ title, subtitle, onPress }) {
         style={styles.button}
       >
         <View style={styles.icon}>
-          <Ionicons name="timer-outline" size={36} color="#EEEEEE" />
+          <Ionicons name={icon} size={36} color="#EEEEEE" />
         </View>
         <View>
           <Text style={styles.title}>{title}</Text>

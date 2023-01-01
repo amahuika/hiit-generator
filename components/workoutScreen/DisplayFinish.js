@@ -72,6 +72,8 @@ function DisplayFinish({
           console.log("workout id entered " + results.insertId);
           if (results.insertId > 0) {
             lastId = results.insertId;
+            const questionMarks = updatedList.map((e) => "(?,?)").join(",");
+            const params = updatedList.map((e) => [lastId, e.id]);
             for (const exercise of updatedList) {
               tx.executeSql(
                 "INSERT INTO workout_junction (workout_id, exercise_id) VALUES (?,?)",
